@@ -1,0 +1,34 @@
+package com.example.collab_desk.service;
+
+import com.example.collab_desk.dto.requestDto.CreateTaskRequestDto;
+import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
+import com.example.collab_desk.dto.responseDto.TaskResponseDto;
+import com.example.collab_desk.entity.Task;
+import com.example.collab_desk.enums.TaskStatus;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public interface TaskService {
+    TaskResponseDto createTask(CreateTaskRequestDto request);
+
+    TaskResponseDto getTask(Long id);
+
+    TaskResponseDto updateTask(Long id, UpdateTaskRequestDto request);
+
+    void deleteTask(Long id);
+
+    List<TaskResponseDto> getAllTasks();
+
+    Task getTaskById(Long id);
+
+    TaskResponseDto updateStatus(Long taskId, TaskStatus status);
+
+    List<TaskResponseDto> getTasksByProject(Long projectId);
+
+    List<TaskResponseDto> getTaskByYearAndMonth(int year, int month);
+
+    List<TaskResponseDto> getMyTaskByYearAndMonth(int year, int month);
+
+    List<TaskResponseDto> getMyTasks();
+}
