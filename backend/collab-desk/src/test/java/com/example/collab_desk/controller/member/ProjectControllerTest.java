@@ -1,6 +1,7 @@
 package com.example.collab_desk.controller.member;
 
 import com.example.collab_desk.dto.responseDto.ProjectResponseDto;
+import com.example.collab_desk.entity.Project;
 import com.example.collab_desk.enums.ProjectPriority;
 import com.example.collab_desk.enums.ProjectStatus;
 import com.example.collab_desk.exception.ResourceNotFoundException;
@@ -12,14 +13,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.hasSize;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.mockito.Mockito.when;
 
 @WebMvcTest(ProjectController.class)
 public class ProjectControllerTest {
@@ -107,6 +108,59 @@ public class ProjectControllerTest {
         mockMvc.perform(get("/api/projects/all"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    // Search Projects Tests
+
+    @Test
+    @WithMockUser
+    public void searchProjects_shouldReturn200WithProjects() throws Exception {
+        // arrange
+        String keyword = "Test";
+
+        ProjectResponseDto project1 = buildProjectResponse(1L);
+        project1.setTitle("Test");
+        ProjectResponseDto project2 = buildProjectResponse(2L);
+        project2.setTitle("Test");
+        List<ProjectResponseDto> projects = new ArrayList<>(List.of(project1, project2));
+
+        when(projectService.searchProjects(eq(keyword))).thenReturn(projects);
+
+        // act & assert
+        mockMvc.perform(get("/api/projects/search")
+                        .param("keyword", "Test"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[0].title").value("Test"))
+                .andExpect(jsonPath("$[1].title").value("Test"));
+    }
+
+    @Test
+    @WithMockUser
+    public void searchProjects_shouldReturn200WithEmptyProjectList() throws Exception {
+        // arrange
+        String keyword = "Test";
+        List<ProjectResponseDto> projects = new ArrayList<>(List.of());
+
+        when(projectService.searchProjects(eq(keyword))).thenReturn(projects);
+
+        // act & assert
+        mockMvc.perform(get("/api/projects/search")
+                        .param("keyword", "Test"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    public void searchProjects_shouldReturn401WhenUserIsNotAuthenticated() throws Exception {
+        // act & assert
+        mockMvc.perform(get("/api/projects/search")
+                        .param("keyword", "Test"))
+                .andExpect(status().isUnauthorized());
+
+        verify(projectService, never()).searchProjects(anyString());
     }
 
 }

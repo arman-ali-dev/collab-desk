@@ -379,4 +379,75 @@ public class ProjectServiceImplTest {
         assertThrows(ResourceNotFoundException.class,
                 () -> projectService.getProject(projectId));
     }
+
+    // Search Project Tests
+
+    @Test
+    public void searchProjects_shouldReturnProjectsSuccessfully() {
+        // arrange
+        String keyword = "Hello World";
+
+        Project project1 = buildExistingProject(userWithId(1L));
+        project1.setTitle("Hello World");
+        Project project2 = buildExistingProject(userWithId(1L));
+        project2.setTitle("Hello World");
+        List<Project> projects = new ArrayList<>(List.of(project1, project2));
+
+        when(projectRepository.findByTitleContainingIgnoreCase(keyword)).thenReturn(projects);
+
+        // act
+        List<ProjectResponseDto> response = projectService.searchProjects(keyword);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals("Hello World", response.get(0).getTitle());
+        assertEquals("Hello World", response.get(1).getTitle());
+    }
+
+    @Test
+    public void searchProjects_shouldReturnEmptyProjectListSuccessfully() {
+        // arrange
+        String keyword = "Test";
+
+        List<Project> projects = new ArrayList<>(List.of());
+
+        when(projectRepository.findByTitleContainingIgnoreCase(keyword)).thenReturn(projects);
+
+        // act
+        List<ProjectResponseDto> response = projectService.searchProjects(keyword);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(0, response.size());
+    }
+
+    // Filter Project By Status
+
+    @Test
+    public void filterProjects_shouldReturnProjectsByStatus() {
+        // arrange
+        String status = "COMPLETED";
+
+        Project project1 = buildExistingProject(userWithId(1L));
+        project1.setId(1L);
+        project1.setStatus(ProjectStatus.COMPLETED);
+        Project project2 = buildExistingProject(userWithId(1L));
+        project2.setId(2L);
+        project2.setStatus(ProjectStatus.COMPLETED);
+        List<Project> projects = new ArrayList<>(List.of(project1, project2));
+
+        when(projectRepository.findByStatus(ProjectStatus.valueOf(status))).thenReturn(projects);
+
+        // act
+        List<ProjectResponseDto> response = projectService.filterProjects(status, null);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(1L, response.get(0).getId());
+        assertEquals(2L, response.get(1).getId());
+        assertEquals(ProjectStatus.COMPLETED, response.get(0).getStatus());
+        assertEquals(ProjectStatus.COMPLETED, response.get(1).getStatus());
+    }
 }
