@@ -1,0 +1,110 @@
+import searchIcon from "../assets/search.png";
+import chronometerIcon from "../assets/chronometer.png";
+import plusIcon from "../assets/plus.png";
+import bellIcon from "../assets/bell.png";
+import userAvatar from "../assets/profile.jpg";
+
+import { Avatar, Tooltip } from "@mui/material";
+
+const Navbar = () => {
+  return (
+    <>
+      <div
+        className="px-10 py-4 flex relative w-full justify-between bg-white"
+        style={{
+          boxShadow: "0 1px 0 #efefef, 0 2px 8px rgba(0,0,0,0.04)",
+          transition: "box-shadow 0.2s ease",
+        }}
+      >
+        <div
+          className="search-input-wrap flex gap-2 items-center bg-[#EFEFEF] px-3 rounded-lg"
+          style={{ minWidth: 200 }}
+        >
+          <div className="flex justify-center items-center">
+            <img
+              className="w-3.5"
+              src={searchIcon}
+              alt=""
+              style={{ transition: "opacity 0.2s", opacity: 0.6 }}
+            />
+          </div>
+          <input
+            className="border-0 outline-0 py-2.5 text-[13px] placeholder:text-[13px]  bg-transparent w-full"
+            style={{
+              color: "#000",
+              opacity: 0.8,
+              transition: "opacity 0.2s",
+            }}
+            type="text"
+            placeholder="Search here..."
+          />
+        </div>
+
+        <div className="flex items-center gap-7">
+          <div className="flex gap-2">
+            <Tooltip title="Reminder">
+              <div className="nav-icon-btn w-9 h-9 relative cursor-pointer bg-[#EFEFEF] rounded-lg flex justify-center items-center">
+                <img
+                  className="w-4.5"
+                  src={chronometerIcon}
+                  alt=""
+                  style={{
+                    transition: "transform 0.2s ease",
+                  }}
+                />
+                <span className="badge-dot bg-[#FA2626] absolute -top-0.5 -right-1 opacity-80 flex justify-center items-center text-[9px] text-white h-3.5 w-3.5 rounded-full">
+                  1
+                </span>
+              </div>
+            </Tooltip>
+
+            <Tooltip title="Notifications">
+              <div className="nav-icon-btn w-9 cursor-pointer relative h-9 bg-[#EFEFEF] rounded-lg flex justify-center items-center">
+                <img
+                  className="w-4"
+                  src={bellIcon}
+                  alt=""
+                  style={{
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+
+                <span className="badge-dot bg-[#FA2626] absolute -top-0.5 -right-1 opacity-80 flex justify-center items-center text-[9px] text-white h-3.5 w-3.5 rounded-full">
+                  2
+                </span>
+              </div>
+            </Tooltip>
+
+            <Tooltip title="Create Task">
+              <div className="w-9 h-9 rounded-lg flex justify-center items-center nav-icon-btn bg-[#EFEFEF] cursor-pointer">
+                <img className="w-3.5" src={plusIcon} alt="" />
+              </div>
+            </Tooltip>
+          </div>
+
+          <div className="h-full w-px bg-[#efefef]"> </div>
+
+          <Tooltip title="Profile">
+            <div
+              className="avatar-btn cursor-pointer"
+              onClick={() => navigate("/profile")}
+            >
+              <Avatar
+                src={userAvatar}
+                alt="User Profile"
+                sx={{
+                  width: 35.5,
+                  height: 35.5,
+                  cursor: "pointer",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+          </Tooltip>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Navbar;
