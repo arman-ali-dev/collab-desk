@@ -86,7 +86,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectResponseDto> getAllProjects() {
-        return projectRepository.findAll()
+        return projectRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(this::mapToProjectResponse).toList();
     }
@@ -115,7 +115,7 @@ public class ProjectServiceImpl implements ProjectService {
         } else if (priority != null) {
             projects = projectRepository.findByPriority(ProjectPriority.valueOf(priority));
         } else {
-            projects = projectRepository.findAll();
+            projects = projectRepository.findAllByOrderByCreatedAtDesc();
         }
 
         return projects.stream().
@@ -138,6 +138,7 @@ public class ProjectServiceImpl implements ProjectService {
                 project.getLogo(),
                 project.getOrganizationName(),
                 project.getUrl(),
+                project.getCreatedAt(),
                 project.getMembers().stream().map(this::mapToUserResponse).toList());
     }
 

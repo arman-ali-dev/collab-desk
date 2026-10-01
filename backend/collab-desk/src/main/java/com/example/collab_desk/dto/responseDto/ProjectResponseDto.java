@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -24,5 +26,6 @@ public class ProjectResponseDto {
     private String logo;
     private String organizationName;
     private String url;
+    private LocalDateTime createdAt;
     private List<UserResponseDto> members;
 }

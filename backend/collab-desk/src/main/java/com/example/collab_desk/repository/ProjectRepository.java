@@ -11,6 +11,8 @@ import java.util.List;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByTitleContainingIgnoreCase(String title);
 
+    List<Project> findAllByOrderByCreatedAtDesc();
+
     List<Project> findByStatus(ProjectStatus status);
 
     List<Project> findByPriority(ProjectPriority priority);

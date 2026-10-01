@@ -18,6 +18,22 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ExceptionResponseDto> handleResourceNotFoundException(
+            ResourceNotFoundException ex, HttpServletRequest request) {
+        ExceptionResponseDto responseDto = new ExceptionResponseDto(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(responseDto);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ExceptionResponseDto> handleRuntimeException(
             RuntimeException ex, HttpServletRequest request) {
@@ -34,21 +50,7 @@ public class GlobalExceptionHandler {
                 .body(responseDto);
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ExceptionResponseDto> handleResourceNotFoundException(
-            ResourceNotFoundException ex, HttpServletRequest request) {
-        ExceptionResponseDto responseDto = new ExceptionResponseDto(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                HttpStatus.NOT_FOUND.getReasonPhrase(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(responseDto);
-    }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ExceptionResponseDto> handleUnauthorizedException(

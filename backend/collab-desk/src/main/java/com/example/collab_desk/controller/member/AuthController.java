@@ -20,7 +20,6 @@ public class AuthController {
 
     private final AuthService authService;
 
-
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDto> registrationHandler(@Valid @RequestBody RegisterRequestDto request) {
         AuthResponseDto response = authService.register(request);
@@ -29,6 +28,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> loginHandler(@Valid  @RequestBody LoginRequestDto request) {
+        System.out.println("Hello World");
         AuthResponseDto response = authService.login(request);
         return ResponseEntity.ok(response);
     }
