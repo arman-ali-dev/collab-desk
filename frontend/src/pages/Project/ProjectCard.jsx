@@ -8,9 +8,24 @@ import deleteIcon from "../../assets/delete.png";
 import userAvatar from "../../assets/userAvatar.png";
 import projectLogo from "../../assets/ahitlogo.webp";
 
-const ProjectCard = () => {
+const ProjectCard = ({ project }) => {
   const progressColor =
     11.2 > 50 ? "#18A322" : 11.2 === 50 ? "#157FD7" : "#FA2626";
+
+  const getDaysAgo = (startDate) => {
+    if (!startDate) return null;
+
+    const today = new Date();
+    const start = new Date(startDate);
+
+    // Time hata do, sirf date compare ho
+    today.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    return Math.round((today - start) / msPerDay);
+  };
+
   return (
     <>
       <div>
@@ -61,7 +76,7 @@ const ProjectCard = () => {
 
           <img
             className="w-16 h-16 object-contain"
-            src={projectLogo}
+            src={project.logo}
             alt=""
             style={{
               transition: "transform 0.3s cubic-bezier(0.34,1.56,0.64,1)",
@@ -72,11 +87,11 @@ const ProjectCard = () => {
             className="font-medium text-[14px] mt-2.5"
             style={{ opacity: 0.8 }}
           >
-            All hind info
+            {project.title}
           </h3>
 
           <Link
-            to={"https://ahit.com"}
+            to={project.url}
             onClick={(e) => e.stopPropagation()}
             className="font-medium -mt-1 text-[12px] flex gap-1 items-center"
             target="_blank"
@@ -89,12 +104,12 @@ const ProjectCard = () => {
             onMouseLeave={(e) => (e.currentTarget.style.color = "#747373")}
           >
             <img className="w-2.5" src={externalIcon} alt="" />
-            <span>https://ahit.com</span>
+            <span>{project.url}</span>
           </Link>
 
           <p className="text-[13.5px] font-medium mt-4">
-            Lorem ipsum, dolor sit amet consectetur pisicing elit. Repellendus,
-            accusamus!
+            {project?.description.split(" ").slice(0, 10).join(" ")}
+            {project?.description.split(" ").length > 10 && "..."}
           </p>
 
           <div className="mt-5">
@@ -105,12 +120,12 @@ const ProjectCard = () => {
                 color: "inherit",
               }}
             >
-              11.2%
+              {project.progress}%
             </p>
             <div className="h-1 w-full bg-[#D4D9D4] rounded-full overflow-hidden">
               <div
                 style={{
-                  width: "11.2%",
+                  width: project.progress,
                   backgroundColor: progressColor,
                   height: "100%",
                   borderRadius: "inherit",
@@ -128,19 +143,24 @@ const ProjectCard = () => {
               }}
             >
               <img className="w-3" src={clockIcon} alt="" />
-              <span className="font-medium">2 days left</span>
+              <span className="font-medium">
+                {getDaysAgo(project?.createdAt)} Days Ago
+              </span>
             </div>
 
             <div className="flex">
-              <div
-                className="min-w-8 min-h-8 w-8 h-8 rounded-full object-cover flex items-center justify-center text-white text-[13px] font-semibold  z-50 border-white border-2"
-                style={{
-                  backgroundColor: "#9c9b9b",
-                  transition: `transform 0.2s ease ${1 * 35}ms`,
-                }}
-              >
-                <img className="rounded-full" src={userAvatar} alt="" />
-              </div>
+              {project.members.map((u, index) => (
+                <div
+                  key={u.id}
+                  className={`min-w-8 min-h-8 w-8 h-8 rounded-full object-cover flex items-center justify-center text-white text-[13px] font-semibold ${index != project.members.length - 1 && "-mr-3"}  z-50 border-white border-2`}
+                  style={{
+                    backgroundColor: "#9c9b9b",
+                    transition: `transform 0.2s ease ${1 * 35}ms`,
+                  }}
+                >
+                  <img className="rounded-full" src={userAvatar} alt="" />
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -11,9 +11,13 @@ const api = axios.create({
   timeout: 10000,
 });
 
+const PUBLIC_ROUTES = ["/auth/login"];
+
 api.interceptors.request.use((config) => {
+  const isPublic = PUBLIC_ROUTES.some((route) => config.url?.includes(route));
   const token = localStorage.getItem("token");
-  if (token) {
+
+  if (token && !isPublic) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
@@ -23,7 +27,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && localStorage.getItem("token")) {
+    const isPublic = PUBLIC_ROUTES.some((route) =>
+      error.config?.url?.includes(route),
+    );
+
+    if (
+      error.response?.status === 401 &&
+      !isPublic &&
+      localStorage.getItem("token")
+    ) {
       localStorage.removeItem("token");
       window.location.href = "/signin";
     }

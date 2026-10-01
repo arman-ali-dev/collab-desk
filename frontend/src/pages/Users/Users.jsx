@@ -3,8 +3,17 @@ import plusIcon from "../../assets/plus.png";
 import searchIcon from "../../assets/search.png";
 import filterIcon from "../../assets/filter.png";
 import UserTable from "./UserTable";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { getAllUsers } from "../../store/admin/userSlice";
 
 const Users = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllUsers());
+  }, [dispatch]);
+
   return (
     <>
       <div className=" mt-4 mx-8 relative">

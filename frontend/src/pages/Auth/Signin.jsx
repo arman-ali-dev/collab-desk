@@ -35,10 +35,10 @@ const Signin = () => {
 
   const onSubmit = async (data) => {
     try {
-      dispatch(login(data));
-      reset();
+      await dispatch(login(data)).unwrap();
+      navigate("/dashboard");
     } catch (err) {
-      setError("root", { message: "Something went wrong, try again" });
+      setError("root", { message: err });
     }
   };
 
@@ -153,9 +153,7 @@ const Signin = () => {
                 <CircularProgress size={15} sx={{ color: "#fff" }} />
               )}
 
-              <span className="font-medium">
-                {isSubmitting ? "Signing in..." : "Sign In"}
-              </span>
+              {!isSubmitting && <span className="font-medium">Sign In</span>}
             </Button>
           </div>
         </form>

@@ -1,10 +1,40 @@
-import { IconButton } from "@mui/material";
+import { IconButton, Skeleton } from "@mui/material";
 import searchIcon from "../../assets/search.png";
 import filterIcon from "../../assets/filter.png";
 import plusIcon from "../../assets/plus.png";
 import ProjectCard from "./ProjectCard";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllProjects } from "../../store/member/projectSlice";
+import { useEffect, useState } from "react";
+import ProjectCardSkeleton from "./ProjectCardSkeleton";
+import AddProjectForm from "./AddProjectForm";
 
 const Projects = () => {
+  const dispatch = useDispatch();
+  const { projects, loading, error } = useSelector(
+    (state) => state.memberProjects,
+  );
+
+  useEffect(() => {
+    dispatch(getAllProjects());
+  }, [dispatch]);
+
+  const [open, setOpen] = useState(false);
+  const toggleDrawer = (value) => (event) => {
+    setOpen(value);
+  };
+
+  if (error) {
+    return (
+      <>
+        <div>
+          <p className="text-red-500">{error}</p>
+          <button onClick={() => dispatch(fetchProjects())}>Retry</button>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div
@@ -46,6 +76,7 @@ const Projects = () => {
 
           <div className="flex gap-2">
             <IconButton
+              onClick={toggleDrawer(true)}
               sx={{
                 width: 36,
                 height: 36,
@@ -98,9 +129,15 @@ const Projects = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-5 mt-6">
-          <ProjectCard />
+          {loading
+            ? [1, 2, 3].map((elem) => <ProjectCardSkeleton key={elem} />)
+            : projects?.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
         </div>
       </div>
+
+      <AddProjectForm toggleDrawer={toggleDrawer} open={open} />
     </>
   );
 };

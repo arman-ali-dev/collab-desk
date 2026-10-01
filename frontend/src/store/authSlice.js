@@ -1,8 +1,4 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  isRejectedWithValue,
-} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginUser } from "../services/authService";
 
 const initialState = {
@@ -16,8 +12,7 @@ export const login = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const res = await loginUser(credentials);
-      console.log(res);
-
+      localStorage.setItem("token", res.token);
       return res;
     } catch (err) {
       let message = "Unexpected error occurred";
