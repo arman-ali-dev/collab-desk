@@ -1,6 +1,7 @@
 import { IconButton } from "@mui/material";
 import searchIcon from "../../assets/search.png";
 import filterIcon from "../../assets/filter.png";
+import plusIcon from "../../assets/plus.png";
 import ProjectCard from "./ProjectCard";
 
 const Projects = () => {
@@ -44,6 +45,31 @@ const Projects = () => {
           </div>
 
           <div className="flex gap-2">
+            <IconButton
+              sx={{
+                width: 36,
+                height: 36,
+                backgroundColor: "#EFEFEF",
+                borderRadius: "8px",
+                transition:
+                  "background 0.18s ease, transform 0.15s ease !important",
+                "&:hover": {
+                  backgroundColor: "#e0e0e0 !important",
+                  transform: "scale(1.06) !important",
+                },
+                "&:active": { transform: "scale(0.93) !important" },
+              }}
+            >
+              <img
+                src={plusIcon}
+                alt=""
+                className="w-3.5"
+                style={{
+                  transition: "transform 0.2s ease",
+                }}
+              />
+            </IconButton>
+
             <IconButton
               sx={{
                 width: 36,

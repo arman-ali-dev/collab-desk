@@ -5,8 +5,22 @@ import bellIcon from "../assets/bell.png";
 import userAvatar from "../assets/profile.jpg";
 
 import { Avatar, Tooltip } from "@mui/material";
+import { useState } from "react";
+import CreateNewTaskForm from "../pages/Dashboard/CreateNewTaskForm";
 
 const Navbar = () => {
+  const [open, setOpen] = useState(false);
+
+  const toggleDrawer = (value) => (event) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+
+    setOpen(value);
+  };
   return (
     <>
       <div
@@ -75,7 +89,7 @@ const Navbar = () => {
               </div>
             </Tooltip>
 
-            <Tooltip title="Create Task">
+            <Tooltip onClick={toggleDrawer(true)} title="Create Task">
               <div className="w-9 h-9 rounded-lg flex justify-center items-center nav-icon-btn bg-[#EFEFEF] cursor-pointer">
                 <img className="w-3.5" src={plusIcon} alt="" />
               </div>
@@ -103,6 +117,8 @@ const Navbar = () => {
           </Tooltip>
         </div>
       </div>
+
+      <CreateNewTaskForm toggleDrawer={toggleDrawer} open={open} />
     </>
   );
 };

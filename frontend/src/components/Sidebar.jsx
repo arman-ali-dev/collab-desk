@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 const manu = [
   { label: "Dashboard", icon: chartIcon, path: "/dashboard" },
   { label: "Projects", icon: monitorIcon, path: "/projects" },
-  // { label: "My Tasks", icon: checklistIcon, path: "/my-tasks" },
+  { label: "My Tasks", icon: checklistIcon, path: "/my-tasks" },
   { label: "Calender", icon: calenderIcon, path: "/calendar" },
   // { label: "Chat", icon: chatIcon, path: "/chat" },
   // { label: "Drive", icon: driveIcon, path: "/drive" },
