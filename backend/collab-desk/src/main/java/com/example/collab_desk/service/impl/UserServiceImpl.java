@@ -1,5 +1,6 @@
 package com.example.collab_desk.service.impl;
 
+import com.example.collab_desk.dto.requestDto.EditProfileRequestDto;
 import com.example.collab_desk.dto.responseDto.UserProfileResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
 import com.example.collab_desk.entity.User;
@@ -87,6 +88,24 @@ public class UserServiceImpl implements UserService {
                 user.getDesignation(),
                 user.getRole(),
                 user.getStatus());
+    }
+
+    @Override
+    public UserProfileResponseDto editProfile(EditProfileRequestDto request) {
+        User currentUser = getCurrentUser();
+        currentUser.setFullName(request.getFullName());
+        currentUser.setEmail(request.getEmail());
+        currentUser.setProfileImage(request.getProfileImage());
+        currentUser.setDesignation(request.getDesignation());
+
+        User savedUser = userRepository.save(currentUser);
+
+        return new UserProfileResponseDto(
+                savedUser.getFullName(),
+                savedUser.getEmail(),
+                savedUser.getDesignation(),
+                savedUser.getRole(),
+                savedUser.getStatus());
     }
 
     private UserResponseDto mapToUserResponse(User user) {
