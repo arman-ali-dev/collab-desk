@@ -180,7 +180,8 @@ public class TaskServiceImpl implements TaskService {
         return new UserResponseDto(
                 user.getId(),
                 user.getFullName(),
-                user.getEmail()
+                user.getEmail(),
+                user.getProfileImage()
         );
     }
 }

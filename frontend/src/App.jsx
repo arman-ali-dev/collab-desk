@@ -3,7 +3,7 @@ import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Projects from "./pages/Project/Projects";
-import Calendar from "./pages/Calender/Calender";
+import Calendar from "./pages/Calendar/Calendar";
 import Users from "./pages/Users/Users";
 import MyTasks from "./pages/Task/MyTasks";
 import Signin from "./pages/Auth/Signin";

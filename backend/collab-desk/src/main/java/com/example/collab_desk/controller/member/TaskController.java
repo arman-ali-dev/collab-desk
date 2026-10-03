@@ -22,7 +22,6 @@ public class TaskController {
             @PathVariable Long id,
             @RequestParam String status
     ) {
-        System.out.println("Status : " + status);
         TaskResponseDto response = taskService.updateStatus(id, TaskStatus.valueOf(status));
         return ResponseEntity.ok(response);
     }

@@ -124,7 +124,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private UserResponseDto mapToUserResponse(User user) {
-        return new UserResponseDto(user.getId(), user.getFullName(), user.getEmail());
+        return new UserResponseDto(
+                user.getId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getProfileImage());
     }
 
     private ProjectResponseDto mapToProjectResponse(Project project) {

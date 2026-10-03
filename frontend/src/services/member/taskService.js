@@ -11,3 +11,11 @@ export const updateTaskStatusApi = async (id, status) => {
   });
   return response.data;
 };
+
+export const getTasksByYearAndMonthApi = async (year, month) => {
+  const response = await api.get("/api/tasks/calender/my", {
+    params: { year, month },
+  });
+
+  return response.data;
+};

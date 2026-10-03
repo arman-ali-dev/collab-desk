@@ -99,7 +99,8 @@ public class UserServiceImpl implements UserService {
         return new UserResponseDto(
                 user.getId(),
                 user.getFullName(),
-                user.getEmail()
+                user.getEmail(),
+                user.getProfileImage()
         );
     }
 
