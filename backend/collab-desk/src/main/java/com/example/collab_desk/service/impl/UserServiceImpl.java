@@ -81,13 +81,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileResponseDto getProfile() {
-        User user = getCurrentUser();
-        return new UserProfileResponseDto(
-                user.getFullName(),
-                user.getEmail(),
-                user.getDesignation(),
-                user.getRole(),
-                user.getStatus());
+        return mapToUserProfileResponse(getCurrentUser());
     }
 
     @Override
@@ -98,14 +92,7 @@ public class UserServiceImpl implements UserService {
         currentUser.setProfileImage(request.getProfileImage());
         currentUser.setDesignation(request.getDesignation());
 
-        User savedUser = userRepository.save(currentUser);
-
-        return new UserProfileResponseDto(
-                savedUser.getFullName(),
-                savedUser.getEmail(),
-                savedUser.getDesignation(),
-                savedUser.getRole(),
-                savedUser.getStatus());
+        return mapToUserProfileResponse(userRepository.save(currentUser));
     }
 
     private UserResponseDto mapToUserResponse(User user) {
@@ -113,6 +100,16 @@ public class UserServiceImpl implements UserService {
                 user.getId(),
                 user.getFullName(),
                 user.getEmail()
+        );
+    }
+
+    private UserProfileResponseDto mapToUserProfileResponse(User user) {
+        return new UserProfileResponseDto(
+                user.getFullName(),
+                user.getEmail(),
+                user.getDesignation(),
+                user.getRole(),
+                user.getProfileImage()
         );
     }
 }

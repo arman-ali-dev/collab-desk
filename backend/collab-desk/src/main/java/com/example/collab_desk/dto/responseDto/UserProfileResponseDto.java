@@ -16,5 +16,5 @@ public class UserProfileResponseDto {
     private String email;
     private String designation;
     private UserRole role;
-    private UserStatus status;
+    private String profileImage;
 }
