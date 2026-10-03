@@ -106,6 +106,7 @@ public class UserServiceImpl implements UserService {
 
     private UserProfileResponseDto mapToUserProfileResponse(User user) {
         return new UserProfileResponseDto(
+                user.getId(),
                 user.getFullName(),
                 user.getEmail(),
                 user.getDesignation(),

@@ -19,3 +19,8 @@ export const getTasksByYearAndMonthApi = async (year, month) => {
 
   return response.data;
 };
+
+export const getMyTasksByProjectApi = async (projectId) => {
+  const response = await api.get(`/api/tasks/project/${projectId}`);
+  return response.data;
+};

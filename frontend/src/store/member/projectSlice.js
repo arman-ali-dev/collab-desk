@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   filterProjectApi,
+  getProjectApi,
   getProjects,
   searchProjectApi,
 } from "../../services/member/projectService";
@@ -13,6 +14,9 @@ const initialState = {
   searchResults: [],
   searchLoading: false,
   searchError: null,
+
+  project: null,
+  getLoading: false,
 };
 
 export const getAllProjects = createAsyncThunk(
@@ -100,6 +104,35 @@ export const filterProjects = createAsyncThunk(
   },
 );
 
+export const getProject = createAsyncThunk(
+  "project/get",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await getProjectApi(id);
+      console.log("Get: ", res);
+
+      return res;
+    } catch (err) {
+      let message = "Unexpected error occurred";
+
+      if (err.response) {
+        const status = err.response.status;
+        const serverMsg = err.response.data?.message;
+
+        if (status >= 500) {
+          message = "Server error, please try later";
+        } else {
+          message = serverMsg || "Something went wrong";
+        }
+      } else if (err.request) {
+        message = "Cannot reach server. Check your internet or try later";
+      }
+
+      return rejectWithValue(message);
+    }
+  },
+);
+
 const projectSlice = createSlice({
   name: "project",
   initialState,
@@ -118,6 +151,10 @@ const projectSlice = createSlice({
 
     clearSearchResults: (state, _) => {
       state.searchResults = [];
+    },
+
+    clearProject: (state, _) => {
+      state.project = null;
     },
   },
   extraReducers: (builder) => {
@@ -157,10 +194,25 @@ const projectSlice = createSlice({
       .addCase(filterProjects.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Something went wrong";
+      })
+      .addCase(getProject.pending, (state, action) => {
+        state.getLoading = true;
+      })
+      .addCase(getProject.fulfilled, (state, action) => {
+        state.getLoading = false;
+        state.project = action.payload;
+      })
+      .addCase(getProject.rejected, (state, action) => {
+        state.getLoading = false;
       });
   },
 });
 
-export const { addProject, editProject, removeProject, clearSearchResults } =
-  projectSlice.actions;
+export const {
+  addProject,
+  editProject,
+  removeProject,
+  clearSearchResults,
+  clearProject,
+} = projectSlice.actions;
 export default projectSlice.reducer;

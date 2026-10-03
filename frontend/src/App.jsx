@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { fetchProfile } from "./store/profileSlice";
 import Profile from "./pages/Account/Profile";
+import KanbanBoard from "./pages/Kanban/KanbanBoard";
 
 function App() {
   const dispatch = useDispatch();
@@ -43,6 +44,10 @@ function App() {
               <Route element={<Users />} path="/users" />
               <Route element={<MyTasks />} path="/my-tasks" />
               <Route element={<Profile />} path="/profile" />
+              <Route
+                path="/projects/:projectId/kanban"
+                element={<KanbanBoard />}
+              />
               <Route element={<Signin />} path="/signin" />
             </Routes>
           </div>

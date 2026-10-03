@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   getMyTasksApi,
+  getMyTasksByProjectApi,
   getTasksByYearAndMonthApi,
   updateTaskStatusApi,
 } from "../../services/member/taskService";
@@ -12,6 +13,9 @@ const initialState = {
 
   calendarLoading: false,
   calendarTasks: [],
+
+  projectTasks: [],
+  kanbanLoading: false,
 };
 
 export const fetchMyTasks = createAsyncThunk(
@@ -48,9 +52,12 @@ export const updateTaskStatus = createAsyncThunk(
     try {
       const res = await updateTaskStatusApi(id, status);
       dispatch(updateStatus(res));
+      dispatch(updateStatusInKanban(res));
 
       return res;
     } catch (err) {
+      console.log(err);
+
       let message = "Unexpected error occurred";
 
       if (err.response) {
@@ -79,7 +86,33 @@ export const fetchMyTasksByYearAndMonth = createAsyncThunk(
     try {
       const res = await getTasksByYearAndMonthApi(year, month);
 
-      console.log("Calendar: ", res);
+      return res;
+    } catch (err) {
+      let message = "Unexpected error occurred";
+
+      if (err.response) {
+        const status = err.response.status;
+        const serverMsg = err.response.data?.message;
+
+        if (status >= 500) {
+          message = "Server error, please try later";
+        } else {
+          message = serverMsg || "Something went wrong";
+        }
+      } else if (err.request) {
+        message = "Cannot reach server. Check your internet or try later";
+      }
+
+      return rejectWithValue(message);
+    }
+  },
+);
+
+export const fetchTasksByProject = createAsyncThunk(
+  "memberTask/fetchTasksByProject",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const res = await getMyTasksByProjectApi(projectId);
 
       return res;
     } catch (err) {
@@ -112,6 +145,18 @@ const taskSlice = createSlice({
         t.id == action.payload.id ? action.payload : t,
       );
     },
+    clearTasksProject: (state, action) => {
+      state.projectTasks = [];
+    },
+    updateStatusInKanban: (state, action) => {
+      state.projectTasks = state.projectTasks.map((t) =>
+        t.id == action.payload.id ? action.payload : t,
+      );
+    },
+
+    addTasksInProjectTasks: (state, action) => {
+      state.projectTasks = [action.payload, ...state.projectTasks];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -137,9 +182,25 @@ const taskSlice = createSlice({
       })
       .addCase(fetchMyTasksByYearAndMonth.rejected, (state, action) => {
         state.calendarLoading = false;
+      })
+
+      .addCase(fetchTasksByProject.pending, (state, action) => {
+        state.kanbanLoading = true;
+      })
+      .addCase(fetchTasksByProject.fulfilled, (state, action) => {
+        state.kanbanLoading = false;
+        state.projectTasks = action.payload;
+      })
+      .addCase(fetchTasksByProject.rejected, (state, action) => {
+        state.kanbanLoading = false;
       });
   },
 });
 
-export const { updateStatus } = taskSlice.actions;
+export const {
+  updateStatus,
+  clearTasksProject,
+  updateStatusInKanban,
+  addTasksInProjectTasks,
+} = taskSlice.actions;
 export default taskSlice.reducer;

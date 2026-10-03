@@ -16,3 +16,8 @@ export const filterProjectApi = async (status, priority) => {
   });
   return res.data;
 };
+
+export const getProjectApi = async (id) => {
+  const response = await api.get(`/api/projects/${id}`);
+  return response.data;
+};
