@@ -6,8 +6,11 @@ import chatIcon from "../assets/chat.png";
 import driveIcon from "../assets/drive.png";
 import usersIcon from "../assets/users.png";
 import logoutIcon from "../assets/logout.png";
+import { logout } from "../store/authSlice";
+import dashboardIcon from "../assets/layout.png";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 const manu = [
   { label: "Dashboard", icon: chartIcon, path: "/dashboard" },
@@ -20,6 +23,13 @@ const manu = [
 ];
 
 const Sidebar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/signin");
+  };
   return (
     <>
       <div
@@ -31,7 +41,7 @@ const Sidebar = () => {
       >
         <div className="flex items-center gap-12 border-[#efefef] border-r pl-3 pr-14 border-b h-17.25 shadow ">
           <Link
-            className="text-[21px] font-bold"
+            className="text-[21px] font-bold ml-4 flex justify-between items-center"
             style={{
               transition: "opacity 0.2s ease, letter-spacing 0.2s ease",
             }}
@@ -42,12 +52,12 @@ const Sidebar = () => {
               e.currentTarget.style.opacity = "1";
             }}
           >
-            <img
-              src="https://a2groups.org/assets/a2glogo-cf360e03.png"
-              alt="A2 Groups Logo"
-              className="w-28 h-18 object-contain"
-            />
+            <h2>Dashboard</h2>
           </Link>
+
+          <div className="bg-black flex h-10.5 w-10.5 justify-center items-center rounded-2xl">
+            <img src={dashboardIcon} className="w-5 object-contain" />
+          </div>
         </div>
 
         <ul className="px-6 mt-10 space-y-1">
@@ -89,6 +99,7 @@ const Sidebar = () => {
 
         <div className="px-6 absolute bottom-6 w-full border-[#efefef] border-t pt-6">
           <div
+            onClick={handleLogout}
             className="logout-btn pl-5 py-3 relative cursor-pointer w-full rounded-lg bg-[#EFEFEF]"
             style={{
               opacity: 1,

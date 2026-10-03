@@ -1,9 +1,22 @@
+import { useDispatch, useSelector } from "react-redux";
 import FilesUploadedCard from "./FilesUploadedCard";
 import StatusCardsSection from "./StatusCardsSection";
 import TaskStatusCard from "./TaskStatusCard";
 import TaskTable from "./TaskTable";
+import { useEffect } from "react";
+import { fetchTasks } from "../../store/admin/taskSlice";
+import { getAllProjects } from "../../store/member/projectSlice";
+import { getAllUsers } from "../../store/admin/userSlice";
 
 const Dashboard = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchTasks());
+    dispatch(getAllProjects());
+    dispatch(getAllUsers());
+  }, [dispatch]);
+
   return (
     <>
       <div

@@ -1,5 +1,6 @@
 package com.example.collab_desk.service.impl;
 
+import com.example.collab_desk.dto.responseDto.UserProfileResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
 import com.example.collab_desk.entity.User;
 import com.example.collab_desk.exception.ResourceNotFoundException;
@@ -75,6 +76,17 @@ public class UserServiceImpl implements UserService {
     public List<UserResponseDto> searchUsers(String fullName, String email) {
         return userRepository.findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(fullName, email)
                 .stream().map(this::mapToUserResponse).toList();
+    }
+
+    @Override
+    public UserProfileResponseDto getProfile() {
+        User user = getCurrentUser();
+        return new UserProfileResponseDto(
+                user.getFullName(),
+                user.getEmail(),
+                user.getDesignation(),
+                user.getRole(),
+                user.getStatus());
     }
 
     private UserResponseDto mapToUserResponse(User user) {

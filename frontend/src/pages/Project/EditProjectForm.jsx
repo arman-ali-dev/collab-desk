@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRef, useState } from "react";
 import { clearSearchResults, searchUser } from "../../store/admin/userSlice";
 import { uploadToCloudinary } from "../../util/uploadToCloudinary";
-import { createProject } from "../../store/admin/projectSlice";
+import { createProject, updateProject } from "../../store/admin/projectSlice";
 
 const inputClass =
   "w-full outline-0 px-4 py-2 text-[15px] mt-1 border rounded-sm transition-all duration-200  focus:shadow-[0_0_0_2px_rgba(0,0,0,0.08)] ";
@@ -40,7 +40,7 @@ const selectSx = {
 const selectClass =
   "border border-[#BCBCBC] w-full outline-none text-[15px] mt-1 rounded-sm h-10.5 box-border";
 
-const AddProjectForm = ({ toggleDrawer, open }) => {
+const EditProjectForm = ({ project, toggleDrawer, open }) => {
   const dispatch = useDispatch();
   const [openSnack, setOpenSnack] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
@@ -57,15 +57,15 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
     resolver: yupResolver(projectSchema),
     mode: "onBlur",
     defaultValues: {
-      title: "",
-      description: "",
-      priority: "",
-      status: "",
-      members: [],
-      logo: "",
-      organizationName: "",
-      url: "",
-      progress: 0.0,
+      title: project.title || "",
+      description: project.description || "",
+      priority: project.priority || "",
+      status: project.status || "",
+      members: project.members.map((elem) => elem.id) || [],
+      logo: project.logo || "",
+      organizationName: project.organizationName || "",
+      url: project.url || "",
+      progress: project.progress || 0.0,
     },
   });
 
@@ -74,7 +74,7 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
   );
 
   const [search, setSearch] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState(project.members || []);
   const memberIds = watch("members");
 
   const handleSearch = (e) => {
@@ -106,7 +106,7 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
   };
 
   const [uploading, setUploading] = useState(false);
-  const [logo, setLogo] = useState("");
+  const [logo, setLogo] = useState(project.logo || "");
   const logoInputRef = useRef(null);
 
   const handleLogoChange = async (e) => {
@@ -137,22 +137,21 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
 
   const onSubmit = async (data) => {
     try {
-      await dispatch(createProject(data)).unwrap();
+      await dispatch(updateProject({ id: project.id, data })).unwrap();
       setSnackType("success");
-      setSnackMessage("Project added");
+      setSnackMessage("Project saved");
       setOpenSnack(true);
       toggleDrawer(false)();
-      reset();
-      setLogo("");
-      setSelectedUsers([]);
     } catch (err) {
+      console.log(err);
+
       setSnackType("error");
       setSnackMessage(err);
       setOpenSnack(true);
     }
   };
 
-  const { createLoading } = useSelector((state) => state.adminProjects);
+  const { updateLoading } = useSelector((state) => state.adminProjects);
   return (
     <>
       <Drawer
@@ -411,12 +410,12 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
                 <div className="flex-1">
                   <label className={labelClass}>Priority</label>
                   <Select
-                    defaultValue=""
+                    defaultValue={project.priority}
                     fullWidth
                     displayEmpty
                     className={selectClass}
                     sx={selectSx}
-                    {...register("category")}
+                    {...register("priority")}
                   >
                     <MenuItem value="">Select Priority</MenuItem>
                     <MenuItem value="HIGH">High</MenuItem>
@@ -434,7 +433,7 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
                 <div className="flex-1">
                   <label className={labelClass}>Status</label>
                   <Select
-                    defaultValue=""
+                    defaultValue={project.status}
                     fullWidth
                     displayEmpty
                     className={selectClass}
@@ -482,11 +481,11 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
                     "&:hover": { backgroundColor: "#222" },
                   }}
                 >
-                  {createLoading && (
+                  {updateLoading && (
                     <CircularProgress size={15} sx={{ color: "#fff" }} />
                   )}
 
-                  {!createLoading && <span>Add Project</span>}
+                  {!updateLoading && <span>Save Changes</span>}
                 </Button>
               </div>
             </form>
@@ -512,4 +511,4 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
   );
 };
 
-export default AddProjectForm;
+export default EditProjectForm;

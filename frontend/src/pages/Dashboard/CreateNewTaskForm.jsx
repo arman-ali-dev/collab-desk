@@ -1,25 +1,163 @@
 import Box from "@mui/material/Box";
 
-import { Select, MenuItem, Button, Drawer, Snackbar } from "@mui/material";
+import {
+  Select,
+  MenuItem,
+  Button,
+  Drawer,
+  Snackbar,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 import removeIcon from "../../assets/remove.png";
 import uploadIcon from "../../assets/upload.png";
 import userAvatar from "../../assets/userAvatar.png";
+import { clearSearchResults, searchUser } from "../../store/admin/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { taskSchema } from "../../validations/taskSchema";
+import { useEffect, useState } from "react";
+import { getAllProjects } from "../../store/member/projectSlice";
+import { createTask } from "../../store/admin/taskSlice";
+
+const inputClass =
+  "w-full outline-0 px-4 py-2 text-[15px] mt-1 border rounded-sm";
+
+const selectClass =
+  "border border-[#BCBCBC] w-full outline-none mt-1 rounded-sm h-10.5 box-border";
+
+const labelClass = "text-[#616161] text-[14px]";
+
+const selectSx = {
+  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+  "& .MuiSelect-select": {
+    paddingLeft: "16px",
+    display: "flex",
+    alignItems: "center",
+    fontSize: "13px",
+    fontWeight: "400",
+    color: "#000",
+  },
+};
 
 const CreateNewTaskForm = ({ toggleDrawer, open }) => {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(taskSchema),
+    mode: "onBlur",
+    defaultValues: {
+      title: "",
+      description: "",
+      status: "",
+      category: "",
+      priority: "",
+      dueDate: "",
+      estimatedTime: "",
+      projectId: "",
+      assignedTo: [],
+    },
+  });
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllProjects());
+  }, [dispatch]);
+
+  const [search, setSearch] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const assignedToIds = watch("assignedTo");
+
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
+  const [snackType, setSnackType] = useState("success");
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+
+    if (value.trim().length < 2) {
+      dispatch(clearSearchResults());
+      return;
+    }
+
+    dispatch(searchUser(value.trim()));
+  };
+
+  const handleAddUser = (user) => {
+    setSelectedUsers([...selectedUsers, user]);
+    setValue("assignedTo", [...assignedToIds, user.id], {
+      shouldValidate: true,
+    });
+    setSearch("");
+    dispatch(clearSearchResults());
+  };
+
+  const handleRemoveUser = (id) => {
+    setSelectedUsers(selectedUsers.filter((u) => u.id !== id));
+    setValue(
+      "assignedTo",
+      assignedToIds.filter((m) => m !== id),
+      { shouldValidate: true },
+    );
+  };
+
+  const { projects } = useSelector((state) => state.memberProjects);
+
+  const { searchResults, searchLoading } = useSelector(
+    (state) => state.adminUsers,
+  );
+
+  const { createLoading } = useSelector((state) => state.adminTasks);
+
+  const onSubmit = async (data) => {
+    try {
+      await dispatch(createTask(data)).unwrap();
+      setSnackType("success");
+      setSnackMessage("Task created");
+      setOpenSnack(true);
+      toggleDrawer(false)();
+      reset();
+      setSelectedUsers([]);
+    } catch (err) {
+      console.log(err);
+
+      setSnackType("error");
+      setSnackMessage(err);
+      setOpenSnack(true);
+    }
+  };
+
   const form = () => (
     <Box sx={{ width: 750 }} className="overflow-y-scroll" role="presentation">
       <div className="px-8 py-10">
         <h2 className="font-semibold ">Create New Task</h2>
 
-        <form className="mt-5 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4">
           <div className="flex gap-4 ">
             <div className="flex-1">
               <label className="text-[#616161]  text-[14px]">Task Title</label>
               <input
-                name="title"
+                {...register("title")}
+                id="title"
+                className={`${inputClass} ${
+                  errors.title ? "border-red-500" : "border-[#BCBCBC]"
+                }`}
                 type="text"
-                className="border-[#BCBCBC] w-full outline-0 px-4 py-2 text-[15px] mt-1 border rounded-sm"
               />
+
+              {errors.title && (
+                <p className="text-red-500 text-[12px] mt-1">
+                  {errors.title.message}
+                </p>
+              )}
             </div>
             <div className="flex-1">
               <label className="text-[#616161]  text-[14px]">Category</label>
@@ -28,18 +166,9 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
                 defaultValue=""
                 displayEmpty
                 name="category"
-                className="border border-[#BCBCBC] w-full outline-none mt-1 rounded-sm h-10.5 box-border"
-                sx={{
-                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-                  "& .MuiSelect-select": {
-                    paddingLeft: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    fontSize: "13px",
-                    fontWeight: "400",
-                    color: "#000",
-                  },
-                }}
+                className={selectClass}
+                sx={selectSx}
+                {...register("category")}
               >
                 <MenuItem
                   defaultChecked
@@ -71,6 +200,11 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
                   Research
                 </MenuItem>
               </Select>
+              {errors.category && (
+                <p className="text-red-500 text-[12px] mt-1">
+                  {errors.category.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -79,10 +213,18 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
               <label className="text-[#616161]  text-[14px]">Description</label>
 
               <textarea
-                name="description"
-                rows="4"
-                className="border-[#BCBCBC] resize-none w-full outline-0 px-4 py-2 text-[15px] mt-1 border rounded-sm"
+                {...register("description")}
+                id="description"
+                className={`${inputClass} resize-none ${
+                  errors.description ? " border-red-500" : " border-[#B7B7B7]"
+                }`}
               ></textarea>
+
+              {errors.description && (
+                <p className="text-red-500 text-[12px] mt-1">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -91,22 +233,11 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
               <label className="text-[#616161]  text-[14px]">Project</label>
 
               <Select
-                name="project"
                 fullWidth
                 defaultValue=""
-                displayEmpty
-                className="border border-[#BCBCBC] w-full outline-none mt-1 rounded-sm h-10.5 box-border"
-                sx={{
-                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-                  "& .MuiSelect-select": {
-                    paddingLeft: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    fontSize: "13px",
-                    fontWeight: "400",
-                    color: "#000",
-                  },
-                }}
+                className={selectClass}
+                sx={selectSx}
+                {...register("projectId")}
               >
                 <MenuItem
                   defaultChecked
@@ -115,10 +246,22 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
                 >
                   Select Project
                 </MenuItem>
-                <MenuItem sx={{ fontSize: "13px", fontWeight: "600" }}>
-                  project 1
-                </MenuItem>
+                {projects?.map((p) => (
+                  <MenuItem
+                    key={p.id}
+                    value={p.id}
+                    sx={{ fontSize: "13px", fontWeight: "600" }}
+                  >
+                    {p.title}
+                  </MenuItem>
+                ))}
               </Select>
+
+              {errors.projectId && (
+                <p className="text-red-500 text-[12px] mt-1">
+                  {errors.projectId.message}
+                </p>
+              )}
             </div>
 
             <div className="flex-1">
@@ -129,18 +272,9 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
                 fullWidth
                 defaultValue=""
                 displayEmpty
-                className="border border-[#BCBCBC] w-full outline-none mt-1 rounded-sm h-10.5 box-border"
-                sx={{
-                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-                  "& .MuiSelect-select": {
-                    paddingLeft: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    fontSize: "13px",
-                    fontWeight: "400",
-                    color: "#000",
-                  },
-                }}
+                className={selectClass}
+                sx={selectSx}
+                {...register("priority")}
               >
                 <MenuItem
                   defaultChecked
@@ -162,65 +296,186 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
                   Low
                 </MenuItem>
               </Select>
+              {errors.priority && (
+                <p className="text-red-500 text-[12px] mt-1">
+                  {errors.priority.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex-1">
+              <label className="text-[#616161]  text-[14px]">Status</label>
+
+              <Select
+                name="status"
+                fullWidth
+                defaultValue=""
+                displayEmpty
+                className={selectClass}
+                sx={selectSx}
+                {...register("status")}
+              >
+                <MenuItem
+                  defaultChecked
+                  value=""
+                  sx={{ fontSize: "13px", fontWeight: "600" }}
+                >
+                  Select Status
+                </MenuItem>
+                <MenuItem
+                  value="TO_DO"
+                  sx={{ fontSize: "13px", fontWeight: "600" }}
+                >
+                  To Do
+                </MenuItem>
+                <MenuItem value="IN_PROGRESS" sx={{ fontSize: "13px" }}>
+                  In Progress
+                </MenuItem>
+                <MenuItem value="REVIEW" sx={{ fontSize: "13px" }}>
+                  Review
+                </MenuItem>
+
+                <MenuItem value="DONE" sx={{ fontSize: "13px" }}>
+                  Done
+                </MenuItem>
+              </Select>
+              {errors.status && (
+                <p className="text-red-500 text-[12px] mt-1">
+                  {errors.status.message}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="flex gap-4">
             <div className="flex-1">
-              <label className="text-[#616161] text-[14px]">
-                Estimated Time (hours)
-              </label>
+              <label className={labelClass}>Estimated Time (hours)</label>
               <input
                 name="estimatedTime"
                 type="number"
                 min="0"
                 step="0.5"
                 placeholder="e.g. 2.5"
-                className="border-[#BCBCBC] w-full outline-0 px-4 py-2 text-[15px] mt-1 border rounded-sm"
+                {...register("estimatedTime")}
+                id="estimatedTime"
+                className={`${inputClass} ${
+                  errors.estimatedTime ? "border-red-500" : "border-[#BCBCBC]"
+                }`}
               />
               <p className="text-[11px] text-[#9E9E9E] mt-1">
                 Approx time required to complete the task
               </p>
+
+              {errors.estimatedTime && (
+                <p className="text-red-500 text-[12px] mt-1">
+                  {errors.estimatedTime.message}
+                </p>
+              )}
             </div>
 
             <div className="flex-1">
-              <label className="text-[#616161] text-[14px]">Due Date</label>
+              <label className={labelClass}>Due Date</label>
               <input
-                name="dueDate"
+                {...register("dueDate")}
+                id="dueDate"
+                className={`${inputClass} ${
+                  errors.dueDate ? "border-red-500" : "border-[#BCBCBC]"
+                }`}
                 type="date"
-                className="border-[#BCBCBC] w-full outline-0 px-4 py-2 text-[15px] mt-1 border rounded-sm"
               />
+              {errors.dueDate && (
+                <p className="text-red-500 text-[12px] mt-1">
+                  {errors.dueDate.message}
+                </p>
+              )}
             </div>
           </div>
           <div>
-            <label className="text-[#616161] text-[14px]">Assigned To</label>
+            <label className={labelClass}>Assigned To</label>
 
             <div className="relative">
               <input
                 type="text"
+                value={search}
+                onChange={handleSearch}
                 placeholder="Search user..."
-                className="border-[#BCBCBC] w-full outline-0 px-4 py-2 text-[15px] mt-1 border rounded-sm"
+                className={inputClass}
               />
+
+              {search.trim().length >= 2 && (
+                <div className="absolute w-full bg-white border border-[#BCBCBC] mt-1 z-20 max-h-56 overflow-y-auto rounded-sm shadow-lg">
+                  {searchLoading && (
+                    <p className="px-4 py-3 text-[13px]">Searching...</p>
+                  )}
+
+                  {!searchLoading && searchResults.length === 0 && (
+                    <p className="px-4 py-3 text-[13px]">No users found</p>
+                  )}
+
+                  {!searchLoading &&
+                    searchResults.map((user) => {
+                      const alreadyAdded = assignedToIds.includes(user.id);
+                      return (
+                        <div
+                          key={user.id}
+                          className="px-4 py-2 flex justify-between items-center hover:bg-[#f5f5f5]"
+                        >
+                          <div className="flex gap-2 items-center">
+                            <img
+                              src={user.profileImage || userAvatar}
+                              className="w-6 h-6 rounded-full"
+                              alt=""
+                            />
+                            <span className="text-sm">{user.fullName}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            disabled={alreadyAdded}
+                            onClick={() => handleAddUser(user)}
+                            sx={{
+                              textTransform: "capitalize",
+                              fontSize: "12px",
+                              backgroundColor: alreadyAdded ? "#aaa" : "#000",
+                              color: "#fff",
+                            }}
+                          >
+                            {alreadyAdded ? "Added" : "Add"}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
 
-            <div className="flex gap-2.5 mt-4">
-              <div className="relative">
-                <img
-                  className="w-8.5 h-8.5 rounded-full object-cover"
-                  src={userAvatar}
-                />
-                <img
-                  className="w-3.5 cursor-pointer absolute top-0 -right-0.5"
-                  src={removeIcon}
-                />
-              </div>
+            {errors.assignedTo && (
+              <p className="text-red-500 text-[12px] mt-1">
+                {errors.assignedTo.message}
+              </p>
+            )}
+
+            <div className="flex gap-2.5 mt-4 flex-wrap">
+              {selectedUsers.map((user) => (
+                <div key={user.id} className="relative">
+                  <img
+                    className="w-8.5 h-8.5 rounded-full object-cover"
+                    src={user.profileImage || userAvatar}
+                    alt=""
+                    title={user.fullName}
+                  />
+                  <img
+                    className="w-3.5 cursor-pointer absolute top-0 -right-0.5"
+                    src={removeIcon}
+                    alt="Remove"
+                    onClick={() => handleRemoveUser(user.id)}
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="mt-5">
-            <label className="text-[#616161] text-[14px]">
-              Upload Document
-            </label>
+            <label className={labelClass}>Upload Document</label>
             <label className="text-[#616161] text-[14px] block">
               Drag and drop document to upload your support task
             </label>
@@ -284,6 +539,7 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
           <div className="flex gap-2 mt-10">
             <Button
               type="button"
+              onReset={() => reset()}
               sx={{
                 textTransform: "capitalize",
                 border: "1px solid #BCBCBC",
@@ -307,7 +563,11 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
                 minWidth: "127px",
               }}
             >
-              <span>Create Task</span>
+              {createLoading && (
+                <CircularProgress size={15} sx={{ color: "#fff" }} />
+              )}
+
+              {!createLoading && <span>Create Task</span>}
             </Button>
           </div>
         </form>
@@ -316,26 +576,43 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
   );
 
   return (
-    <div>
-      <Drawer
-        onClose={toggleDrawer(false)}
-        PaperProps={{
-          sx: {
-            width: 750,
-            borderRadius: "8px 0 0 8px",
-            overflow: "visible",
-          },
-        }}
-        anchor="right"
-        open={open}
+    <>
+      <div>
+        <Drawer
+          onClose={toggleDrawer(false)}
+          PaperProps={{
+            sx: {
+              width: 750,
+              borderRadius: "8px 0 0 8px",
+              overflow: "visible",
+            },
+          }}
+          anchor="right"
+          open={open}
+        >
+          <div
+            onClick={toggleDrawer(false)}
+            className="bg-white h-14 w-1.5 rounded-lg absolute top-1/2 -translate-y-1/2   -left-5 -translate-x-1/2  z-99999999 cursor-grab"
+          ></div>
+          {form()}
+        </Drawer>
+      </div>
+
+      <Snackbar
+        open={openSnack}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnack(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <div
-          onClick={toggleDrawer(false)}
-          className="bg-white h-14 w-1.5 rounded-lg absolute top-1/2 -translate-y-1/2   -left-5 -translate-x-1/2  z-99999999 cursor-grab"
-        ></div>
-        {form()}
-      </Drawer>
-    </div>
+        <Alert
+          onClose={() => setOpenSnack(false)}
+          severity={snackType}
+          sx={{ width: "100%", fontSize: "13px" }}
+        >
+          {snackMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

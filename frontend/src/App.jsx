@@ -7,8 +7,21 @@ import Calendar from "./pages/Calender/Calender";
 import Users from "./pages/Users/Users";
 import MyTasks from "./pages/Task/MyTasks";
 import Signin from "./pages/Auth/Signin";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { fetchProfile } from "./store/profileSlice";
+import Profile from "./pages/Account/Profile";
 
 function App() {
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchProfile());
+    }
+  }, [isAuthenticated, dispatch]);
+
   const location = useLocation();
   const isAuthPage = location.pathname === "/signin";
 
@@ -29,6 +42,7 @@ function App() {
               <Route element={<Calendar />} path="/calendar" />
               <Route element={<Users />} path="/users" />
               <Route element={<MyTasks />} path="/my-tasks" />
+              <Route element={<Profile />} path="/profile" />
               <Route element={<Signin />} path="/signin" />
             </Routes>
           </div>

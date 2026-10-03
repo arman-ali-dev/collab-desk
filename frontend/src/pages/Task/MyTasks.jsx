@@ -1,17 +1,20 @@
 import { DragDropContext } from "@hello-pangea/dnd";
 import meIcon from "../../assets/me.png";
 import TaskSection from "./TaskSection";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { fetchMyTasks, updateTaskStatus } from "../../store/member/taskSlice";
 
 const SECTIONS = [
   {
-    id: "TODO",
+    id: "TO_DO",
     label: "To-Do",
     color: "#157FD7",
     bg: "rgba(21,127,215,0.06)",
   },
   {
     id: "IN_PROGRESS",
-    label: "Doing",
+    label: "In Progress",
     color: "#F55600",
     bg: "rgba(245,86,0,0.06)",
   },
@@ -30,15 +33,26 @@ const MyTasks = () => {
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     )
-      return;
+      console.log(draggableId, destination.draggableId);
+
+    dispatch(
+      updateTaskStatus({ id: draggableId, status: destination.droppableId }),
+    );
+    return;
   };
 
-  const byStatus = (status) => [];
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchMyTasks());
+  }, [dispatch]);
+
+  const { tasks } = useSelector((state) => state.memberTasks);
 
   const tasksBySection = {
-    TODO: byStatus("TODO"),
-    IN_PROGRESS: byStatus("IN_PROGRESS"),
-    DONE: byStatus("DONE"),
+    TO_DO: tasks.filter((t) => t.status == "TO_DO"),
+    IN_PROGRESS: tasks.filter((t) => t.status == "IN_PROGRESS"),
+    DONE: tasks.filter((t) => t.status == "DONE"),
   };
 
   return (
@@ -60,7 +74,7 @@ const MyTasks = () => {
             <img className="w-7" src={meIcon} alt="" />
             <p className="text-[14px] font-semibold">My Tasks</p>
             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-              2 total
+              {tasks?.length} total
             </span>
           </div>
 

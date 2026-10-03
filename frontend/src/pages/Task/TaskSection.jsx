@@ -2,9 +2,12 @@ import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { useState } from "react";
 import ReactDOM from "react-dom";
 import Task from "./Task";
+import { useSelector } from "react-redux";
 
 const TaskSection = ({ sectionId, label, color, bg, tasks, sectionIndex }) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const { profile } = useSelector((state) => state.profile);
+
   return (
     <>
       <div
@@ -44,7 +47,7 @@ const TaskSection = ({ sectionId, label, color, bg, tasks, sectionIndex }) => {
               textAlign: "center",
             }}
           >
-            2
+            {tasks?.length}
           </span>
         </div>
 
@@ -70,29 +73,14 @@ const TaskSection = ({ sectionId, label, color, bg, tasks, sectionIndex }) => {
                   transition: "background 0.15s ease, padding 0.15s ease",
                 }}
               >
-                <Draggable key={1} draggableId={String(1)} index={0}>
-                  {(provided, snapshot) => {
-                    const child = (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={{
-                          ...provided.draggableProps.style,
-                          borderRadius: 12,
-                        }}
-                      >
-                        <Task
-                          task={null}
-                          isDragging={snapshot.isDragging}
-                          currentUserId={1}
-                          userRole={"MEMBER"}
-                        />
-                      </div>
-                    );
-
-                    if (snapshot.isDragging) {
-                      return ReactDOM.createPortal(
+                {tasks?.map((task, idx) => (
+                  <Draggable
+                    key={task.id}
+                    draggableId={String(task.id)}
+                    index={idx}
+                  >
+                    {(provided, snapshot) => {
+                      const child = (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
@@ -100,28 +88,49 @@ const TaskSection = ({ sectionId, label, color, bg, tasks, sectionIndex }) => {
                           style={{
                             ...provided.draggableProps.style,
                             borderRadius: 12,
-                            // Slightly lift
-                            filter: "drop-shadow(0 16px 32px rgba(0,0,0,0.22))",
                           }}
                         >
                           <Task
-                            task={null}
-                            isDragging={true}
-                            currentUserId={1}
-                            userRole={"MEMBER"}
+                            task={task}
+                            isDragging={snapshot.isDragging}
+                            currentUserId={profile?.id}
+                            userRole={profile?.role}
                           />
-                        </div>,
-                        document.body,
+                        </div>
                       );
-                    }
 
-                    return child;
-                  }}
-                </Draggable>
+                      if (snapshot.isDragging) {
+                        return ReactDOM.createPortal(
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={{
+                              ...provided.draggableProps.style,
+                              borderRadius: 12,
+                              filter:
+                                "drop-shadow(0 16px 32px rgba(0,0,0,0.22))",
+                            }}
+                          >
+                            <Task
+                              task={task}
+                              isDragging={true}
+                              currentUserId={profile?.id}
+                              userRole={profile?.role}
+                            />
+                          </div>,
+                          document.body,
+                        );
+                      }
+
+                      return child;
+                    }}
+                  </Draggable>
+                ))}
 
                 {provided.placeholder}
 
-                {[]?.length === 0 && (
+                {tasks?.length === 0 && (
                   <p
                     className="text-[13px] text-center py-3"
                     style={{

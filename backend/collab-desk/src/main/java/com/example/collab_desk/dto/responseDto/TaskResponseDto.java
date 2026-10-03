@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -25,4 +26,6 @@ public class TaskResponseDto {
     private LocalDate dueDate;
     private Long estimatedTime;
     private List<UserResponseDto> assignedTo;
+    private LocalDateTime createdAt;
+    private String projectName;
 }

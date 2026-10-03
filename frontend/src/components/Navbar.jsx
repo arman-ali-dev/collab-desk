@@ -2,25 +2,24 @@ import searchIcon from "../assets/search.png";
 import chronometerIcon from "../assets/chronometer.png";
 import plusIcon from "../assets/plus.png";
 import bellIcon from "../assets/bell.png";
-import userAvatar from "../assets/profile.jpg";
+import userAvatar from "../assets/userAvatar.png";
 
 import { Avatar, Tooltip } from "@mui/material";
 import { useState } from "react";
 import CreateNewTaskForm from "../pages/Dashboard/CreateNewTaskForm";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const { profile } = useSelector((state) => state.profile);
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
 
-  const toggleDrawer = (value) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-
+  const toggleDrawer = (value) => () => {
     setOpen(value);
   };
+
   return (
     <>
       <div
@@ -100,11 +99,11 @@ const Navbar = () => {
 
           <Tooltip title="Profile">
             <div
-              className="avatar-btn cursor-pointer"
+              className="avatar-btn rounded-full cursor-pointer"
               onClick={() => navigate("/profile")}
             >
               <Avatar
-                src={userAvatar}
+                src={profile?.profileImage || userAvatar}
                 alt="User Profile"
                 sx={{
                   width: 35.5,

@@ -3,25 +3,53 @@ import dragIcon from "../../assets/drag.png";
 import messageIcon from "../../assets/mes.png";
 import menuIcon from "../../assets/menu.png";
 import userAvatar from "../../assets/userAvatar.png";
-import { IconButton } from "@mui/material";
+import { Divider, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
+import { updateTaskStatus } from "../../store/member/taskSlice";
+import { useDispatch } from "react-redux";
+import ViewTaskDetailsModal from "./ViewTaskDetailsModal";
 
 const Task = ({ task, isDragging = false, currentUserId, userRole }) => {
+  const dispatch = useDispatch();
   const [hovered, setHovered] = useState(false);
+
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null);
+  const openFilterDropDown = Boolean(filterAnchorEl);
 
   const categoryStyle = {
     color:
-      "DESIGN" === "DESIGN"
+      task.category === "DESIGN"
         ? "#497AF5"
         : "DESIGN" === "DEVELOPMENT"
           ? "rgba(250,38,38,.7)"
           : "#09C015",
     backgroundColor:
-      "DESIGN" === "DESIGN"
+      task.category === "DESIGN"
         ? "rgba(73,122,245,0.2)"
         : "lsnf" === "DEVELOPMENT"
           ? "rgba(222,23,23,.2)"
           : "rgba(1,255,18,.3)",
   };
+
+  const getNextStatus = (status) => {
+    switch (status) {
+      case "TO_DO":
+        return { label: "Move to Doing", value: "IN_PROGRESS" };
+      case "IN_PROGRESS":
+        return { label: "Move to Done", value: "DONE" };
+      default:
+        return null;
+    }
+  };
+
+  const nextStatus = getNextStatus(task.status);
+
+  const handleClick = (e) => setFilterAnchorEl(e.currentTarget);
+  const handleCloseFilterDropDown = () => setFilterAnchorEl(null);
+
+  const [openDetailsModal, setOpenDetailsModal] = useState(false);
+
+  const handleOpenDetailsModal = () => setOpenDetailsModal(true);
+  const handleCloseDetailsModal = () => setOpenDetailsModal(false);
 
   return (
     <>
@@ -60,12 +88,12 @@ const Task = ({ task, isDragging = false, currentUserId, userRole }) => {
             className="text-[13px] font-medium"
             style={{ color: hovered ? "#000" : "#222" }}
           >
-            test title
+            {task.title}
           </p>
         </div>
 
         <p className="text-[13px] text-gray-500 hidden sm:block">
-          test project
+          {task.projectName}
         </p>
 
         <button
@@ -80,22 +108,29 @@ const Task = ({ task, isDragging = false, currentUserId, userRole }) => {
         </button>
 
         <div className="flex">
-          <img
-            className="w-6.5 min-w-6.5 min-h-6.5 h-6.5 -mr-3.5 z-50 relative border-white border rounded-full object-cover"
-            src={userAvatar}
-            alt=""
-          />
+          {task.assignedTo.map((u) => (
+            <Tooltip key={u.id} title={u.fullName}>
+              <img
+                className="w-6.5 min-w-6.5 min-h-6.5 h-6.5 -mr-3.5 z-50 relative border-white border rounded-full object-cover"
+                src={u.profileImage || userAvatar}
+                alt=""
+              />
+            </Tooltip>
+          ))}
         </div>
 
         <div
           style={{ ...categoryStyle }}
           className="px-3 py-1.5 rounded-md text-[11px] font-medium inline-block"
         >
-          DESIGN
+          {task.category}
         </div>
 
         <div>
-          <IconButton sx={{ "&:hover": { backgroundColor: "#d8d8d8" } }}>
+          <IconButton
+            onClick={handleClick}
+            sx={{ "&:hover": { backgroundColor: "#d8d8d8" } }}
+          >
             <img
               src={menuIcon}
               alt="menu"
@@ -105,8 +140,59 @@ const Task = ({ task, isDragging = false, currentUserId, userRole }) => {
               }}
             />
           </IconButton>
+
+          <Menu
+            anchorEl={filterAnchorEl}
+            open={openFilterDropDown}
+            onClose={handleCloseFilterDropDown}
+            PaperProps={{
+              sx: {
+                width: 180,
+                borderRadius: "10px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+              },
+            }}
+            transformOrigin={{ horizontal: "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          >
+            <MenuItem
+              onClick={() => {
+                handleOpenDetailsModal();
+                handleCloseFilterDropDown();
+              }}
+              sx={{ fontSize: "13px", fontWeight: 700 }}
+            >
+              View Details
+            </MenuItem>
+
+            {task.status !== "DONE" && <Divider />}
+
+            {nextStatus && (
+              <MenuItem
+                sx={{ fontSize: "13px", fontWeight: 700 }}
+                onClick={() => {
+                  dispatch(
+                    updateTaskStatus({
+                      id: task.id,
+                      status: nextStatus.value,
+                    }),
+                  );
+
+                  handleCloseFilterDropDown();
+                }}
+              >
+                {nextStatus.label}
+              </MenuItem>
+            )}
+          </Menu>
         </div>
       </div>
+
+      <ViewTaskDetailsModal
+        task={task}
+        open={openDetailsModal}
+        handleClose={handleCloseDetailsModal}
+      />
     </>
   );
 };

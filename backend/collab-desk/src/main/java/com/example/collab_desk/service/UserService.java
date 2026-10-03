@@ -1,5 +1,6 @@
 package com.example.collab_desk.service;
 
+import com.example.collab_desk.dto.responseDto.UserProfileResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
 import com.example.collab_desk.entity.User;
 
@@ -18,4 +19,6 @@ public interface UserService {
     List<UserResponseDto> getAllUsers();
 
     List<UserResponseDto> searchUsers(String fullName, String email);
+
+    UserProfileResponseDto getProfile();
 }

@@ -2,8 +2,11 @@ import { IconButton, Tooltip } from "@mui/material";
 
 import userAvatar from "../../assets/userAvatar.png";
 import filterIcon from "../../assets/filter.png";
+import { useSelector } from "react-redux";
 
 const TaskTable = () => {
+  const { tasks } = useSelector((state) => state.adminTasks);
+
   return (
     <>
       <div
@@ -66,95 +69,100 @@ const TaskTable = () => {
             </thead>
 
             <tbody className="divide-y divide-gray-50">
-              <tr
-                style={{
-                  transition: `opacity 0.35s ease 100ms, transform 0.35s ease 100ms, background 0.15s ease`,
-                  cursor: "default",
-                }}
-              >
-                <td className="py-4 pr-4 text-[13px] font-medium text-gray-700">
-                  title
-                </td>
+              {tasks?.map((t) => (
+                <tr
+                  key={t.id}
+                  style={{
+                    transition: `opacity 0.35s ease 100ms, transform 0.35s ease 100ms, background 0.15s ease`,
+                    cursor: "default",
+                  }}
+                >
+                  <td className="py-4 pr-4 text-[13px] font-medium text-gray-700">
+                    {t.title}
+                  </td>
 
-                <td className="py-4 px-4 text-[13px] font-medium text-gray-700">
-                  project name
-                </td>
+                  <td className="py-4 px-4 text-[13px] font-medium text-gray-700">
+                    {t.description}
+                  </td>
 
-                <td className="py-4 px-4 text-[13px] text-gray-600">
-                  created at
-                </td>
+                  <td className="py-4 px-4 text-[13px] text-gray-600">
+                    {t.createdAt.split("T")[0]}
+                  </td>
 
-                <td className="py-4 px-4">
-                  <span
-                    className={`px-3 py-1 text-[12px] font-semibold rounded ${
-                      "IN_PROGRESS" === "IN_PROGRESS"
-                        ? "bg-[rgba(245,86,0,.2)] text-[#F55600]"
-                        : "TODO" === "TODO"
-                          ? "bg-[rgba(21,127,215,.2)] text-[#157FD7]"
-                          : "bg-[rgba(24,163,34,.2)] text-[#18A322]"
-                    }`}
-                    style={{
-                      display: "inline-block",
-                      transition: "transform 0.2s ease",
-                    }}
-                  >
-                    IN_PROGRESS
-                  </span>
-                </td>
-
-                <td className="py-4 px-4 text-[13px] text-gray-600">
-                  due date
-                </td>
-
-                <td className="py-4 px-4">
-                  <span
-                    className={`px-3 py-1 text-[12px] font-semibold rounded ${
-                      "HIGH" === "HIGH"
-                        ? "bg-[rgba(129,39,255,.2)] text-[#8127FF]"
-                        : "LOW" === "LOW"
+                  <td className="py-4 px-4">
+                    <span
+                      className={`px-3 py-1 text-[12px] font-semibold rounded ${
+                        t.status === "IN_PROGRESS"
                           ? "bg-[rgba(245,86,0,.2)] text-[#F55600]"
-                          : "bg-[rgba(21,127,215,.2)] text-[#157FD7]"
-                    }`}
-                    style={{
-                      display: "inline-block",
-                      transition: "transform 0.2s ease",
-                    }}
-                  >
-                    HIGH
-                  </span>
-                </td>
-
-                <td className="py-4 px-4">
-                  <div className="flex items-center -space-x-2">
-                    <div
-                      className="w-7 h-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-gray-400 text-lg font-light"
+                          : t.status === "TODO"
+                            ? "bg-[rgba(21,127,215,.2)] text-[#157FD7]"
+                            : "bg-[rgba(24,163,34,.2)] text-[#18A322]"
+                      }`}
                       style={{
-                        transition:
-                          "background 0.15s ease, transform 0.15s ease",
-                        cursor: "pointer",
+                        display: "inline-block",
+                        transition: "transform 0.2s ease",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#e5e7eb")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "")
-                      }
                     >
-                      +
-                    </div>
-                    <Tooltip title={"user"}>
-                      <img
-                        src={userAvatar}
-                        alt="user"
-                        className="w-7 h-7 rounded-full border-2 border-white object-cover"
+                      {t.status}
+                    </span>
+                  </td>
+
+                  <td className="py-4 px-4 text-[13px] text-gray-600">
+                    {t.dueDate}
+                  </td>
+
+                  <td className="py-4 px-4">
+                    <span
+                      className={`px-3 py-1 text-[12px] font-semibold rounded ${
+                        t.priority === "HIGH"
+                          ? "bg-[rgba(129,39,255,.2)] text-[#8127FF]"
+                          : t.priority === "LOW"
+                            ? "bg-[rgba(245,86,0,.2)] text-[#F55600]"
+                            : "bg-[rgba(21,127,215,.2)] text-[#157FD7]"
+                      }`}
+                      style={{
+                        display: "inline-block",
+                        transition: "transform 0.2s ease",
+                      }}
+                    >
+                      {t.priority}
+                    </span>
+                  </td>
+
+                  <td className="py-4 px-4">
+                    <div className="flex items-center -space-x-2">
+                      <div
+                        className="w-7 h-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-gray-400 text-lg font-light"
                         style={{
-                          transition: "transform 0.2s ease",
+                          transition:
+                            "background 0.15s ease, transform 0.15s ease",
+                          cursor: "pointer",
                         }}
-                      />
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor = "#e5e7eb")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor = "")
+                        }
+                      >
+                        +
+                      </div>
+                      {t.assignedTo.map((u) => (
+                        <Tooltip title={u.fullName}>
+                          <img
+                            src={u.profileImage || userAvatar}
+                            alt="user"
+                            className="w-7 h-7 rounded-full border-2 border-white object-cover"
+                            style={{
+                              transition: "transform 0.2s ease",
+                            }}
+                          />
+                        </Tooltip>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

@@ -170,7 +170,9 @@ public class TaskServiceImpl implements TaskService {
                 task.getPriority(),
                 task.getDueDate(),
                 task.getEstimatedTime(),
-                task.getAssignedTo().stream().map(this::mapToUserResponse).toList()
+                task.getAssignedTo().stream().map(this::mapToUserResponse).toList(),
+                task.getCreatedAt(),
+                task.getProject().getTitle()
         );
     }
 

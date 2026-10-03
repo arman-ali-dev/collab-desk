@@ -34,7 +34,9 @@ public class AdminProjectController {
     public ResponseEntity<ProjectResponseDto> updateProjectHandler(
             @PathVariable Long id,
             @Valid @RequestBody UpdateProjectRequest request) {
+        System.out.println("hello " + id);
         ProjectResponseDto response = projectService.updateProject(id, request);
+        System.out.println(response.getTitle());
         return ResponseEntity.ok(response);
     }
 }

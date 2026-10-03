@@ -20,9 +20,10 @@ public class TaskController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<TaskResponseDto> updateStatusHandler(
             @PathVariable Long id,
-            @RequestParam TaskStatus status
+            @RequestParam String status
     ) {
-        TaskResponseDto response = taskService.updateStatus(id, status);
+        System.out.println("Status : " + status);
+        TaskResponseDto response = taskService.updateStatus(id, TaskStatus.valueOf(status));
         return ResponseEntity.ok(response);
     }
 

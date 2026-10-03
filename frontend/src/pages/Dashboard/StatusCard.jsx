@@ -1,11 +1,11 @@
-const StatusCard = ({ icon, iconBg, statusIcon, label, num, delay = 0 }) => {
+const StatusCard = ({ icon, iconBg, statusIcon, label, num, total }) => {
   return (
     <>
       <div
         style={{
           opacity: 1,
           transform: "translateY(0) scale(1)",
-          transition: `opacity 0.5s ease ${delay}ms, transform 0.5s cubic-bezier(0.34,1.56,0.64,1) ${delay}ms, box-shadow 0.25s ease`,
+          transition: `opacity 0.5s ease 100ms, transform 0.5s cubic-bezier(0.34,1.56,0.64,1) 100ms, box-shadow 0.25s ease`,
           boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           cursor: "default",
         }}
@@ -26,7 +26,7 @@ const StatusCard = ({ icon, iconBg, statusIcon, label, num, delay = 0 }) => {
           className="text-[14px] font-medium mt-3"
           style={{
             opacity: 0.75,
-            transition: `opacity 0.4s ease ${delay + 200}ms`,
+            transition: `opacity 0.4s ease 300ms`,
           }}
         >
           {label}
@@ -41,7 +41,7 @@ const StatusCard = ({ icon, iconBg, statusIcon, label, num, delay = 0 }) => {
               color: "#111",
             }}
           >
-            2
+            {total}
           </p>
 
           <span

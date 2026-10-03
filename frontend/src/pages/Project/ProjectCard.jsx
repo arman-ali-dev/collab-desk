@@ -1,16 +1,30 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import externalIcon from "../../assets/external.png";
 import { Link, useNavigate } from "react-router-dom";
 import clockIcon from "../../assets/clock.png";
-import { CircularProgress, IconButton, Skeleton } from "@mui/material";
+import {
+  Alert,
+  CircularProgress,
+  IconButton,
+  Skeleton,
+  Snackbar,
+} from "@mui/material";
 import editIcon from "../../assets/edit.png";
 import deleteIcon from "../../assets/delete.png";
 import userAvatar from "../../assets/userAvatar.png";
-import projectLogo from "../../assets/ahitlogo.webp";
+import { useDispatch, useSelector } from "react-redux";
+import EditProjectForm from "./EditProjectForm";
+import { deleteProject } from "../../store/admin/projectSlice";
 
 const ProjectCard = ({ project }) => {
+  const { profile } = useSelector((state) => state.profile);
+
   const progressColor =
-    11.2 > 50 ? "#18A322" : 11.2 === 50 ? "#157FD7" : "#FA2626";
+    project.progress > 50
+      ? "#18A322"
+      : project.progress === 50
+        ? "#157FD7"
+        : "#FA2626";
 
   const getDaysAgo = (startDate) => {
     if (!startDate) return null;
@@ -18,12 +32,36 @@ const ProjectCard = ({ project }) => {
     const today = new Date();
     const start = new Date(startDate);
 
-    // Time hata do, sirf date compare ho
     today.setHours(0, 0, 0, 0);
     start.setHours(0, 0, 0, 0);
 
     const msPerDay = 1000 * 60 * 60 * 24;
     return Math.round((today - start) / msPerDay);
+  };
+
+  const [open, setOpen] = useState(false);
+  const toggleDrawer = (value) => (event) => {
+    setOpen(value);
+  };
+
+  const dispatch = useDispatch();
+  const { deleteProjectId } = useSelector((state) => state.adminProjects);
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
+  const [snackType, setSnackType] = useState("success");
+
+  const handleDelete = async () => {
+    try {
+      await dispatch(deleteProject(project.id)).unwrap();
+
+      setSnackType("success");
+      setSnackMessage("Project deleted");
+      setOpenSnack(true);
+    } catch (err) {
+      setSnackType("error");
+      setSnackMessage(err);
+      setOpenSnack(true);
+    }
   };
 
   return (
@@ -37,7 +75,7 @@ const ProjectCard = ({ project }) => {
             boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
           }}
         >
-          {"MEMBER" === "ADMIN" && (
+          {profile?.role === "ADMIN" && (
             <div
               className="absolute top-3 right-3 flex gap-1 z-50"
               style={{
@@ -45,6 +83,7 @@ const ProjectCard = ({ project }) => {
               }}
             >
               <IconButton
+                onClick={toggleDrawer(true)}
                 size="small"
                 sx={{
                   transition:
@@ -59,6 +98,8 @@ const ProjectCard = ({ project }) => {
               </IconButton>
 
               <IconButton
+                disabled={deleteProjectId == project.id}
+                onClick={handleDelete}
                 size="small"
                 sx={{
                   transition:
@@ -69,7 +110,11 @@ const ProjectCard = ({ project }) => {
                   },
                 }}
               >
-                <img className="w-4" src={deleteIcon} alt="Delete" />
+                {deleteProjectId == project.id ? (
+                  <CircularProgress size={15} sx={{ color: "#000" }} />
+                ) : (
+                  <img className="w-4" src={deleteIcon} alt="Delete" />
+                )}
               </IconButton>
             </div>
           )}
@@ -125,7 +170,7 @@ const ProjectCard = ({ project }) => {
             <div className="h-1 w-full bg-[#D4D9D4] rounded-full overflow-hidden">
               <div
                 style={{
-                  width: project.progress,
+                  width: project.progress + "%",
                   backgroundColor: progressColor,
                   height: "100%",
                   borderRadius: "inherit",
@@ -165,6 +210,27 @@ const ProjectCard = ({ project }) => {
           </div>
         </div>
       </div>
+
+      <EditProjectForm
+        project={project}
+        toggleDrawer={toggleDrawer}
+        open={open}
+      />
+
+      <Snackbar
+        open={openSnack}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnack(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setOpenSnack(false)}
+          severity={snackType}
+          sx={{ width: "100%", fontSize: "13px" }}
+        >
+          {snackMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

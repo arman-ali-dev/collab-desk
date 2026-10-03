@@ -14,14 +14,22 @@ import authReducer from "./authSlice";
 import projectReducer from "./member/projectSlice";
 import adminUserReducer from "./admin/userSlice";
 import adminProjectReducer from "./admin/projectSlice";
+import profileReducer from "./profileSlice";
+import adminTaskReducer from "./admin/taskSlice";
+import memberTaskReducer from "./member/taskSlice";
 
 const storage = storageModule.default;
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  profile: profileReducer,
+
   memberProjects: projectReducer,
+  memberTasks: memberTaskReducer,
+
   adminUsers: adminUserReducer,
   adminProjects: adminProjectReducer,
+  adminTasks: adminTaskReducer,
 });
 
 const persistConfig = {

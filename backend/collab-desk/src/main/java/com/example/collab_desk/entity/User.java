@@ -32,6 +32,8 @@ public class User {
     @Column(nullable = false, length = 150)
     private String designation;
 
+    private String profileImage;
+
     @Column(nullable = false, length = 100)
     private String password;
 
@@ -42,6 +44,8 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status;
+
+
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
