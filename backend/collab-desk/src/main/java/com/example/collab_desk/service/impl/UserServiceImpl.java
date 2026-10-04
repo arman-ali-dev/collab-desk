@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserProfileResponseDto> getAllUsers() {
-        return userRepository.findAll().stream().map(this::mapToUserProfileResponse).toList();
+        return userRepository.findAllByOrderByCreatedAtDesc().stream().map(this::mapToUserProfileResponse).toList();
     }
 
     @Override
@@ -111,8 +111,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileResponseDto createMember(CreateMemberRequestDto request) {
-        User existingUser = getUserByEmail(request.getEmail());
-        if (existingUser != null) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("User is already exists");
         }
         User user = new User();

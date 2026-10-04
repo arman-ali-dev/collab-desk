@@ -61,13 +61,13 @@ export const createUser = createAsyncThunk(
   "adminUser/create",
   async (credentials, { rejectWithValue }) => {
     try {
-      console.log(err);
-
       const res = await createUserApi(credentials);
       console.log("User creaeted ", res);
 
       return res;
     } catch (err) {
+      console.log(err);
+
       let message = "Unexpected error occurred";
 
       if (err.response) {

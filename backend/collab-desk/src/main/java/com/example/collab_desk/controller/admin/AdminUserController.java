@@ -37,6 +37,10 @@ public class AdminUserController {
     @PostMapping("/create")
     public ResponseEntity<UserProfileResponseDto> createMemberHandler(
             @Valid @RequestBody CreateMemberRequestDto request) {
+        System.out.println(request.getEmail());
+        System.out.println(request.getFullName());
+        System.out.println(request.getDesignation());
+        System.out.println(request.getRole());
        UserProfileResponseDto response = userService.createMember(request);
        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
