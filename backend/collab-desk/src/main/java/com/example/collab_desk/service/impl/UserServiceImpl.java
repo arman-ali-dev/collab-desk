@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -126,7 +125,7 @@ public class UserServiceImpl implements UserService {
         PasswordSetupToken passwordSetupToken = new PasswordSetupToken();
 
         String hashedToken = TokenUtil.generateToken();
-        passwordSetupToken.setToken_hash(hashedToken);
+        passwordSetupToken.setTokenHash(hashedToken);
         passwordSetupToken.setUser(savedUser);
         passwordSetupToken.setIsUsed(false);
         passwordSetupToken.setExpireTime(LocalDateTime.now().plusHours(24));

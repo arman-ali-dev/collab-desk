@@ -50,6 +50,7 @@ function App() {
                 path="/projects/:projectId/kanban"
                 element={<KanbanBoard />}
               />
+              <Route path="/set-password" element={<KanbanBoard />} />
               <Route element={<Signin />} path="/signin" />
             </Routes>
           </div>

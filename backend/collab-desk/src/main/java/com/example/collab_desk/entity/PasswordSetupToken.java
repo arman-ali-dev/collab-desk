@@ -20,7 +20,7 @@ public class PasswordSetupToken {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String token_hash;
+    private String tokenHash;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

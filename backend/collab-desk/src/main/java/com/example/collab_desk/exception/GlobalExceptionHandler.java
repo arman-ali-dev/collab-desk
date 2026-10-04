@@ -50,8 +50,6 @@ public class GlobalExceptionHandler {
                 .body(responseDto);
     }
 
-
-
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ExceptionResponseDto> handleUnauthorizedException(
             UnauthorizedException ex, HttpServletRequest request) {
@@ -124,8 +122,6 @@ public class GlobalExceptionHandler {
                 .body(responseDto);
     }
 
-
-
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ExceptionResponseDto> handleDuplicateResourceException(
             DuplicateResourceException ex, HttpServletRequest request) {
@@ -139,6 +135,22 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(responseDto);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ExceptionResponseDto> handleInvalidTokenException(
+            InvalidTokenException ex, HttpServletRequest request) {
+
+        ExceptionResponseDto responseDto = new ExceptionResponseDto(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(responseDto);
     }
 

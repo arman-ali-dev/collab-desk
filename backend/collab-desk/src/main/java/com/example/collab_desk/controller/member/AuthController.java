@@ -1,17 +1,16 @@
 package com.example.collab_desk.controller.member;
 
 import com.example.collab_desk.dto.requestDto.LoginRequestDto;
+import com.example.collab_desk.dto.requestDto.PasswordSetupRequestDto;
 import com.example.collab_desk.dto.requestDto.RegisterRequestDto;
 import com.example.collab_desk.dto.responseDto.AuthResponseDto;
+import com.example.collab_desk.dto.responseDto.PasswordSetupResponseDto;
 import com.example.collab_desk.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -27,9 +26,15 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDto> loginHandler(@Valid  @RequestBody LoginRequestDto request) {
-        System.out.println("Hello World");
+    public ResponseEntity<AuthResponseDto> loginHandler(@Valid @RequestBody LoginRequestDto request) {
         AuthResponseDto response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/set-password")
+    public ResponseEntity<PasswordSetupResponseDto> setPasswordHandler(
+            @Valid @RequestBody PasswordSetupRequestDto request) {
+        PasswordSetupResponseDto response = authService.setPassword(request);
         return ResponseEntity.ok(response);
     }
 }

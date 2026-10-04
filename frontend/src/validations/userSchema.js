@@ -19,3 +19,5 @@ export const createMemberSchema = yup.object({
 
   role: yup.string().required("Role is required"),
 });
+
+export const passwordSetupSchema = yup.object({});
