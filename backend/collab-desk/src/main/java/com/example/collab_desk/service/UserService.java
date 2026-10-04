@@ -1,5 +1,6 @@
 package com.example.collab_desk.service;
 
+import com.example.collab_desk.dto.requestDto.CreateMemberRequestDto;
 import com.example.collab_desk.dto.requestDto.EditProfileRequestDto;
 import com.example.collab_desk.dto.responseDto.UserProfileResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
@@ -25,5 +26,5 @@ public interface UserService {
 
     UserProfileResponseDto editProfile(EditProfileRequestDto request);
 
-    
+    UserProfileResponseDto createMember(CreateMemberRequestDto request);
 }

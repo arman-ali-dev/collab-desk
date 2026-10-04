@@ -1,18 +1,27 @@
 package com.example.collab_desk.service.impl;
 
+import com.example.collab_desk.dto.requestDto.CreateMemberRequestDto;
 import com.example.collab_desk.dto.requestDto.EditProfileRequestDto;
 import com.example.collab_desk.dto.responseDto.UserProfileResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
+import com.example.collab_desk.entity.PasswordSetupToken;
 import com.example.collab_desk.entity.User;
+import com.example.collab_desk.enums.UserStatus;
+import com.example.collab_desk.exception.DuplicateResourceException;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.exception.UnauthorizedException;
+import com.example.collab_desk.repository.PasswordSetupTokenRepository;
 import com.example.collab_desk.repository.UserRepository;
+import com.example.collab_desk.service.EmailService;
 import com.example.collab_desk.service.UserService;
+import com.example.collab_desk.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +33,11 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordSetupTokenRepository passwordSetupTokenRepository;
+    private final EmailService emailService;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @Override
     public User getUser(Long id) {
@@ -93,6 +107,40 @@ public class UserServiceImpl implements UserService {
         currentUser.setDesignation(request.getDesignation());
 
         return mapToUserProfileResponse(userRepository.save(currentUser));
+    }
+
+    @Override
+    public UserProfileResponseDto createMember(CreateMemberRequestDto request) {
+        User existingUser = getUserByEmail(request.getEmail());
+        if (existingUser != null) {
+            throw new DuplicateResourceException("User is already exists");
+        }
+        User user = new User();
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setDesignation(request.getDesignation());
+        user.setRole(request.getRole());
+        user.setStatus(UserStatus.INACTIVE);
+
+        User savedUser = userRepository.save(user);
+
+        PasswordSetupToken passwordSetupToken = new PasswordSetupToken();
+
+        String hashedToken = TokenUtil.generateToken();
+        passwordSetupToken.setToken_hash(hashedToken);
+        passwordSetupToken.setUser(savedUser);
+        passwordSetupToken.setIsUsed(false);
+        passwordSetupToken.setExpireTime(LocalDateTime.now().plusHours(24));
+
+        passwordSetupTokenRepository.save(passwordSetupToken);
+
+        String link = frontendUrl + "/set-password?token=" + hashedToken;
+        String email = user.getEmail();
+        String fullName = user.getFullName();
+
+        emailService.sendInvitation(email, fullName, link);
+
+        return mapToUserProfileResponse(savedUser);
     }
 
     private UserResponseDto mapToUserResponse(User user) {

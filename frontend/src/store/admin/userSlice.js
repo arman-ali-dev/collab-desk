@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getUsers, searchUsers } from "../../services/admin/userService";
+import {
+  createUserApi,
+  getUsers,
+  searchUsers,
+} from "../../services/admin/userService";
 
 const initialState = {
   users: [],
@@ -9,6 +13,8 @@ const initialState = {
   searchResults: [],
   searchLoading: false,
   searchError: null,
+
+  createLoading: false,
 };
 
 export const getAllUsers = createAsyncThunk(
@@ -51,6 +57,41 @@ export const searchUser = createAsyncThunk(
   },
 );
 
+export const createUser = createAsyncThunk(
+  "adminUser/create",
+  async (credentials, { rejectWithValue }) => {
+    try {
+      console.log(err);
+
+      const res = await createUserApi(credentials);
+      console.log("User creaeted ", res);
+
+      return res;
+    } catch (err) {
+      let message = "Unexpected error occurred";
+
+      if (err.response) {
+        const status = err.response.status;
+        const serverMsg = err.response.data?.message;
+
+        if (status == 409) {
+          message = "User already exists!";
+        } else if (status >= 400 && status < 500) {
+          message = "Invalid Request";
+        } else if (status >= 500) {
+          message = "Server error, please try later";
+        } else {
+          message = serverMsg || "Something went wrong";
+        }
+      } else if (err.request) {
+        message = "Cannot reach server. Check your internet or try later";
+      }
+
+      return rejectWithValue(message);
+    }
+  },
+);
+
 const userSlice = createSlice({
   name: "adminUsers",
   initialState,
@@ -87,6 +128,17 @@ const userSlice = createSlice({
       .addCase(searchUser.rejected, (state, action) => {
         state.searchLoading = false;
         state.searchLoading = action.payload || "Something went wrong";
+      })
+
+      .addCase(createUser.pending, (state, action) => {
+        state.createLoading = true;
+      })
+      .addCase(createUser.fulfilled, (state, action) => {
+        state.createLoading = false;
+        state.users = [action.payload, ...state.users];
+      })
+      .addCase(createUser.rejected, (state, action) => {
+        state.createLoading = false;
       });
   },
 });

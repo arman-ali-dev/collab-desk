@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ExceptionResponseDto> handleMethodArgumentTypeMismatchExceptionException(
+    public ResponseEntity<ExceptionResponseDto> handleMethodArgumentTypeMismatchException(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
 
         ExceptionResponseDto responseDto = new ExceptionResponseDto(
@@ -123,6 +123,25 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(responseDto);
     }
+
+
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ExceptionResponseDto> handleDuplicateResourceException(
+            DuplicateResourceException ex, HttpServletRequest request) {
+
+        ExceptionResponseDto responseDto = new ExceptionResponseDto(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(responseDto);
+    }
+
 
 
 }

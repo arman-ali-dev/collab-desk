@@ -34,7 +34,7 @@ public class User {
 
     private String profileImage;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 100)
     private String password;
 
     @Enumerated(value = EnumType.STRING)
@@ -44,8 +44,6 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status;
-
-
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

@@ -11,3 +11,8 @@ export const searchUsers = async (query) => {
   });
   return response.data;
 };
+
+export const createUserApi = async (data) => {
+  const response = await api.post("/api/admin/users/create", data);
+  return response.data;
+};
