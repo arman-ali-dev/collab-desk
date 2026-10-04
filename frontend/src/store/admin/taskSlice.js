@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { createTaskApi, getTasksApi } from "../../services/admin/taskService";
+import {
+  createTaskApi,
+  getTasksApi,
+  updateMembersInTaskApi,
+} from "../../services/admin/taskService";
 
 const initialState = {
   tasks: [],
@@ -7,6 +11,8 @@ const initialState = {
   error: null,
 
   createLoading: false,
+
+  updateMemberLoading: false,
 };
 
 export const fetchTasks = createAsyncThunk(
@@ -70,6 +76,37 @@ export const createTask = createAsyncThunk(
   },
 );
 
+export const updateMembersInTask = createAsyncThunk(
+  "adminTasks/updateMembers",
+  async ({ id, assignedTo }, { rejectWithValue, dispatch }) => {
+    try {
+      const res = await updateMembersInTaskApi(id, { assignedTo });
+      return res;
+    } catch (err) {
+      console.log(err);
+
+      let message = "Unexpected error occurred";
+
+      if (err.response) {
+        const status = err.response.status;
+        const serverMsg = err.response.data?.message;
+
+        if (status >= 400 && status < 500) {
+          message = serverMsg || "Invalid request";
+        } else if (status >= 500) {
+          message = "Server error, please try later";
+        } else {
+          message = serverMsg || "Something went wrong";
+        }
+      } else if (err.request) {
+        message = "Cannot reach server. Check your internet or try later";
+      }
+
+      return rejectWithValue(message);
+    }
+  },
+);
+
 const taskSlice = createSlice({
   name: "adminTasks",
   initialState,
@@ -98,6 +135,19 @@ const taskSlice = createSlice({
       })
       .addCase(createTask.rejected, (state, action) => {
         state.createLoading = false;
+      })
+
+      .addCase(updateMembersInTask.pending, (state, action) => {
+        state.updateMemberLoading = true;
+      })
+      .addCase(updateMembersInTask.fulfilled, (state, action) => {
+        state.updateMemberLoading = false;
+        state.tasks = state.tasks.map((t) =>
+          t.id == action.payload.id ? action.payload : t,
+        );
+      })
+      .addCase(updateMembersInTask.rejected, (state, action) => {
+        state.updateMemberLoading = false;
       });
   },
 });

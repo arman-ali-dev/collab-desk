@@ -1,5 +1,6 @@
 package com.example.collab_desk.service.impl;
 
+import com.example.collab_desk.dto.requestDto.UpdateMemberRequestDto;
 import com.example.collab_desk.dto.requestDto.CreateTaskRequestDto;
 import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
@@ -11,20 +12,16 @@ import com.example.collab_desk.enums.TaskStatus;
 import com.example.collab_desk.enums.UserRole;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.exception.UnauthorizedException;
-import com.example.collab_desk.repository.ProjectRepository;
 import com.example.collab_desk.repository.TaskRepository;
 import com.example.collab_desk.service.ProjectService;
 import com.example.collab_desk.service.TaskService;
 import com.example.collab_desk.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -158,6 +155,15 @@ public class TaskServiceImpl implements TaskService {
         User currentUser = userService.getCurrentUser();
         return taskRepository.findByAssignedTo_id(currentUser.getId())
                 .stream().map(this::mapToTaskResponseDto).toList();
+    }
+
+    @Override
+    public TaskResponseDto updateMembers(Long taskId, UpdateMemberRequestDto request) {
+        Task task = getTaskById(taskId);
+        Set<User> newMembers = userService.getUsersById(request.getAssignedTo());
+        task.setAssignedTo(newMembers);
+
+        return mapToTaskResponseDto(taskRepository.save(task));
     }
 
     private TaskResponseDto mapToTaskResponseDto(Task task) {

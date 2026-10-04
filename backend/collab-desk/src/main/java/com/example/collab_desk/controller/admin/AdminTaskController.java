@@ -1,6 +1,7 @@
 package com.example.collab_desk.controller.admin;
 
 import com.example.collab_desk.dto.requestDto.CreateTaskRequestDto;
+import com.example.collab_desk.dto.requestDto.UpdateMemberRequestDto;
 import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.entity.Task;
@@ -22,14 +23,12 @@ public class AdminTaskController {
 
     @PostMapping
     public ResponseEntity<TaskResponseDto> createTaskHandler(@Valid @RequestBody CreateTaskRequestDto request) {
-        System.out.println("REquest occues" + request.getDescription());
         TaskResponseDto response = taskService.createTask(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskResponseDto> updateTaskHandler(
-            @PathVariable Long id, @Valid @RequestBody UpdateTaskRequestDto request) {
+    public ResponseEntity<TaskResponseDto> updateTaskHandler(@PathVariable Long id, @Valid @RequestBody UpdateTaskRequestDto request) {
         TaskResponseDto response = taskService.updateTask(id, request);
         return ResponseEntity.ok(response);
     }
@@ -47,10 +46,15 @@ public class AdminTaskController {
     }
 
     @GetMapping("/calender")
-    public ResponseEntity<List<TaskResponseDto>> getTasksByYearAndMonthHandler(
-            @RequestParam int year, @RequestParam int month
-    ) {
+    public ResponseEntity<List<TaskResponseDto>> getTasksByYearAndMonthHandler(@RequestParam int year, @RequestParam int month) {
         List<TaskResponseDto> response = taskService.getTaskByYearAndMonth(year, month);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/members/update/{id}")
+    public ResponseEntity<TaskResponseDto> updateMembersHandler(
+            @PathVariable Long id, @Valid @RequestBody UpdateMemberRequestDto request) {
+        TaskResponseDto response = taskService.updateMembers(id, request);
         return ResponseEntity.ok(response);
     }
 }

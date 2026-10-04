@@ -42,8 +42,6 @@ const selectSx = {
 };
 
 const CreateNewTaskForm = ({ toggleDrawer, open, projectId, status }) => {
-  console.log("projectId, ", projectId);
-
   const {
     register,
     handleSubmit,
@@ -136,7 +134,6 @@ const CreateNewTaskForm = ({ toggleDrawer, open, projectId, status }) => {
   const onSubmit = async (data) => {
     try {
       const createdTask = await dispatch(createTask(data)).unwrap();
-      console.log("created Task", createTask);
 
       dispatch(addTasksInProjectTasks(createdTask));
       setSnackType("success");
@@ -146,15 +143,11 @@ const CreateNewTaskForm = ({ toggleDrawer, open, projectId, status }) => {
       reset();
       setSelectedUsers([]);
     } catch (err) {
-      console.log(err);
-
       setSnackType("error");
       setSnackMessage(err);
       setOpenSnack(true);
     }
   };
-
-  console.log(errors);
 
   const form = () => (
     <Box sx={{ width: 750 }} className="overflow-y-scroll" role="presentation">
