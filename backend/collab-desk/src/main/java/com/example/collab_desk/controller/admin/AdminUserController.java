@@ -1,5 +1,6 @@
 package com.example.collab_desk.controller.admin;
 
+import com.example.collab_desk.dto.responseDto.UserProfileResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
 import com.example.collab_desk.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,8 @@ public class AdminUserController {
     private final UserService userService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<UserResponseDto>> getAllUsersHandler() {
-        List<UserResponseDto> response = userService.getAllUsers();
+    public ResponseEntity<List<UserProfileResponseDto>> getAllUsersHandler() {
+        List<UserProfileResponseDto> response = userService.getAllUsers();
         return ResponseEntity.ok(response);
     }
 
@@ -29,9 +30,7 @@ public class AdminUserController {
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false) String email
     ) {
-        System.out.println(fullName + " "  + email);
         List<UserResponseDto> response = userService.searchUsers(fullName, email);
-        System.out.println(response.size());
         return ResponseEntity.ok(response);
     }
 }

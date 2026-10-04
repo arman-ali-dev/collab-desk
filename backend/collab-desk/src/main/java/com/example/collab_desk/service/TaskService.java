@@ -3,6 +3,7 @@ package com.example.collab_desk.service;
 import com.example.collab_desk.dto.requestDto.UpdateMemberRequestDto;
 import com.example.collab_desk.dto.requestDto.CreateTaskRequestDto;
 import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
+import com.example.collab_desk.dto.responseDto.ProjectResponseDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.entity.Task;
 import com.example.collab_desk.enums.TaskStatus;
@@ -33,4 +34,6 @@ public interface TaskService {
     List<TaskResponseDto> getMyTasks();
 
     TaskResponseDto updateMembers(Long taskId, UpdateMemberRequestDto request);
+
+    List<TaskResponseDto> filterTasks(String status, String priority);
 }

@@ -3,6 +3,7 @@ package com.example.collab_desk.controller.admin;
 import com.example.collab_desk.dto.requestDto.CreateTaskRequestDto;
 import com.example.collab_desk.dto.requestDto.UpdateMemberRequestDto;
 import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
+import com.example.collab_desk.dto.responseDto.ProjectResponseDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.entity.Task;
 import com.example.collab_desk.service.TaskService;
@@ -55,6 +56,14 @@ public class AdminTaskController {
     public ResponseEntity<TaskResponseDto> updateMembersHandler(
             @PathVariable Long id, @Valid @RequestBody UpdateMemberRequestDto request) {
         TaskResponseDto response = taskService.updateMembers(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<TaskResponseDto>> filterProjectsHandler(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String priority) {
+        List<TaskResponseDto> response = taskService.filterTasks(status, priority);
         return ResponseEntity.ok(response);
     }
 }

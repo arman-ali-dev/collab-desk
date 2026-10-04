@@ -69,8 +69,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAll().stream().map(this::mapToUserResponse).toList();
+    public List<UserProfileResponseDto> getAllUsers() {
+        return userRepository.findAll().stream().map(this::mapToUserProfileResponse).toList();
     }
 
     @Override
@@ -111,7 +111,8 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 user.getDesignation(),
                 user.getRole(),
-                user.getProfileImage()
+                user.getProfileImage(),
+                user.getStatus()
         );
     }
 }

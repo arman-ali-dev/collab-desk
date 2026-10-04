@@ -18,4 +18,5 @@ public class UserProfileResponseDto {
     private String designation;
     private UserRole role;
     private String profileImage;
+    private UserStatus status;
 }

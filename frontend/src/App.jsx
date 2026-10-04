@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { fetchProfile } from "./store/profileSlice";
 import Profile from "./pages/Account/Profile";
 import KanbanBoard from "./pages/Kanban/KanbanBoard";
+import Drive from "./pages/Drive/Drive";
 
 function App() {
   const dispatch = useDispatch();
@@ -44,6 +45,7 @@ function App() {
               <Route element={<Users />} path="/users" />
               <Route element={<MyTasks />} path="/my-tasks" />
               <Route element={<Profile />} path="/profile" />
+              <Route element={<Drive />} path="/drive" />
               <Route
                 path="/projects/:projectId/kanban"
                 element={<KanbanBoard />}

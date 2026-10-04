@@ -4,8 +4,13 @@ import searchIcon from "../../assets/search.png";
 import filterIcon from "../../assets/filter.png";
 import UserTable from "./UserTable";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { getAllUsers } from "../../store/admin/userSlice";
+import { useEffect, useState } from "react";
+import {
+  clearSearchResults,
+  getAllUsers,
+  searchUser,
+} from "../../store/admin/userSlice";
+import AddMemberForm from "./AddMemberForm";
 
 const Users = () => {
   const dispatch = useDispatch();
@@ -14,6 +19,27 @@ const Users = () => {
     dispatch(getAllUsers());
   }, [dispatch]);
 
+  // search
+
+  const [search, setSearch] = useState("");
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+
+    if (value.trim().length < 2) {
+      dispatch(clearSearchResults());
+      return;
+    }
+
+    dispatch(searchUser(value.trim()));
+  };
+
+  // Add Member
+  const [open, setOpen] = useState(false);
+  const toggleDrawer = (value) => () => {
+    setOpen(value);
+  };
   return (
     <>
       <div className=" mt-4 mx-8 relative">
@@ -23,7 +49,8 @@ const Users = () => {
               <img className="w-3" src={searchIcon} alt="" />
             </div>
             <input
-              onChange={(e) => setSearch(e.target.value)}
+              value={search}
+              onChange={handleSearch}
               className="placeholder:text-[#000000] w-125 border-0 mt-1 outline-0 text-[13px] placeholder:text-[13px] opacity-80"
               type="text"
               placeholder="Search for names, emails or designations..."
@@ -50,6 +77,7 @@ const Users = () => {
             </IconButton>
 
             <IconButton
+              onClick={toggleDrawer(true)}
               sx={{
                 width: 36,
                 height: 36,
@@ -77,6 +105,8 @@ const Users = () => {
           <UserTable />
         </div>
       </div>
+
+      <AddMemberForm open={open} toggleDrawer={toggleDrawer} />
     </>
   );
 };

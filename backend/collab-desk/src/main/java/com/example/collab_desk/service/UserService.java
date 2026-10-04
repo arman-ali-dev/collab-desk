@@ -17,11 +17,13 @@ public interface UserService {
 
     User getCurrentUser();
 
-    List<UserResponseDto> getAllUsers();
+    List<UserProfileResponseDto> getAllUsers();
 
     List<UserResponseDto> searchUsers(String fullName, String email);
 
     UserProfileResponseDto getProfile();
 
     UserProfileResponseDto editProfile(EditProfileRequestDto request);
+
+    
 }

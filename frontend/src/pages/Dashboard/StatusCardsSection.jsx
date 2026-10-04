@@ -11,6 +11,11 @@ const StatusCardsSection = () => {
   const { projects } = useSelector((state) => state.memberProjects);
   const { tasks } = useSelector((state) => state.adminTasks);
   const { users } = useSelector((state) => state.adminUsers);
+
+  const projectTotal = projects?.length || 0;
+  const taskTotal = tasks?.length || 0;
+  const userTotal = users?.length || 0;
+
   return (
     <>
       <div className="grid grid-cols-4 gap-4">
@@ -20,35 +25,38 @@ const StatusCardsSection = () => {
           statusIcon={topIcon}
           label="Total Projects"
           num={22.34}
-          total={0 || projects.length}
+          total={projects?.length || 0}
           delay={0}
         />
+
         <StatusCard
           icon={folderIcon}
           iconBg="#F55600"
           statusIcon={topIcon}
           label="Project Files"
           num={10.56}
-          delay={80}
           total={12}
+          delay={80}
         />
+
         <StatusCard
           icon={checklistIcon}
           iconBg="#157FD7"
           statusIcon={topIcon}
           label="Assigned Tasks"
           num={19.45}
-          total={tasks.length}
+          total={tasks?.length || 0}
           delay={160}
         />
+
         <StatusCard
           icon={groupIcon}
           iconBg="#18A322"
           statusIcon={topIcon}
           label="Team Members"
           num={9.34}
+          total={users?.length || 0}
           delay={240}
-          total={users.length}
         />
       </div>
     </>

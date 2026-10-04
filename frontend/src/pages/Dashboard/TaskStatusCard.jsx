@@ -1,7 +1,36 @@
 import { Button, MenuItem, Select } from "@mui/material";
 import { useSelector } from "react-redux";
+import CreateNewTaskForm from "./CreateNewTaskForm";
+import { useState } from "react";
 
 const TaskStatusCard = () => {
+  const { tasks } = useSelector((state) => state.adminTasks);
+
+  const toDoTasks = tasks?.filter((task) => task.status === "TO_DO");
+  const inProgressTasks = tasks?.filter(
+    (task) => task.status === "IN_PROGRESS",
+  );
+
+  const reviewTasks = tasks?.filter((task) => task.status === "REVIEW");
+  const doneTasks = tasks?.filter((task) => task.status === "DONE");
+
+  const totalTasks = tasks?.length - reviewTasks?.length || 0;
+
+  const toDoPercentage =
+    totalTasks > 0 ? (toDoTasks.length / totalTasks) * 100 : 0;
+
+  const inProgressPercentage =
+    totalTasks > 0 ? (inProgressTasks.length / totalTasks) * 100 : 0;
+
+  const donePercentage =
+    totalTasks > 0 ? (doneTasks.length / totalTasks) * 100 : 0;
+
+  const [open, setOpen] = useState(false);
+
+  const toggleDrawer = (value) => () => {
+    setOpen(value);
+  };
+
   return (
     <>
       <div
@@ -33,8 +62,8 @@ const TaskStatusCard = () => {
                   borderColor: "#BCBCBC",
                 },
                 "& .MuiSelect-select": {
-                  paddingLeft: "10px",
-                  paddingRight: "20px",
+                  paddingLeft: "15px",
+                  paddingRight: "25px",
                   display: "flex",
                   alignItems: "center",
                   fontSize: "13px",
@@ -48,13 +77,7 @@ const TaskStatusCard = () => {
               }}
             >
               <MenuItem value="" sx={{ fontSize: "13px" }}>
-                Today
-              </MenuItem>
-              <MenuItem value="status2" sx={{ fontSize: "13px" }}>
-                This Week
-              </MenuItem>
-              <MenuItem value="status3" sx={{ fontSize: "13px" }}>
-                This Month
+                All Time
               </MenuItem>
             </Select>
           </div>
@@ -68,7 +91,7 @@ const TaskStatusCard = () => {
                 color: "#111",
               }}
             >
-              68
+              {tasks?.length}
             </h3>
             <p
               className="font-medium text-[12px] -mt-0.5"
@@ -82,7 +105,7 @@ const TaskStatusCard = () => {
             <span
               className="inline-block h-1.5"
               style={{
-                width: "20%",
+                width: toDoPercentage + "%",
                 backgroundColor: "#18A322",
                 transition: `width 0.8s`,
                 borderRadius: "2px 0 0 2px",
@@ -92,7 +115,7 @@ const TaskStatusCard = () => {
             <span
               className="inline-block h-1.5"
               style={{
-                width: "50%",
+                width: inProgressPercentage + "%",
                 backgroundColor: "#157FD7",
                 transition: `width 0.8s  `,
                 borderRadius: "2px 0 0 2px",
@@ -102,7 +125,7 @@ const TaskStatusCard = () => {
             <span
               className="inline-block h-1.5"
               style={{
-                width: "30%",
+                width: donePercentage + "%",
                 backgroundColor: "#F55600",
                 transition: `width 0.8s `,
                 borderRadius: "2px 0 0 2px",
@@ -137,7 +160,7 @@ const TaskStatusCard = () => {
                   transition: "transform 0.2s ease",
                 }}
               >
-                28+
+                {toDoTasks?.length}+
               </div>
             </div>
 
@@ -167,7 +190,7 @@ const TaskStatusCard = () => {
                   transition: "transform 0.2s ease",
                 }}
               >
-                34+
+                {inProgressTasks?.length}+
               </div>
             </div>
 
@@ -197,7 +220,7 @@ const TaskStatusCard = () => {
                   transition: "transform 0.2s ease",
                 }}
               >
-                99+
+                {doneTasks?.length}+
               </div>
             </div>
           </div>
@@ -205,6 +228,7 @@ const TaskStatusCard = () => {
 
         <div>
           <Button
+            onClick={toggleDrawer(true)}
             fullWidth
             sx={{
               textTransform: "capitalize",
@@ -230,6 +254,8 @@ const TaskStatusCard = () => {
           </Button>
         </div>
       </div>
+
+      <CreateNewTaskForm toggleDrawer={toggleDrawer} open={open} />
     </>
   );
 };

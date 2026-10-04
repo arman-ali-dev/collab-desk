@@ -17,3 +17,10 @@ export const updateMembersInTaskApi = async (taskId, assignedTo) => {
   );
   return response.data;
 };
+
+export const filterTasksApi = async (status, priority) => {
+  const res = await api.get("/api/admin/tasks/filter", {
+    params: { status, priority },
+  });
+  return res.data;
+};

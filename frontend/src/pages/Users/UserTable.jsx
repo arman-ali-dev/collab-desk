@@ -1,12 +1,27 @@
 import userAvatar from "../../assets/userAvatar.png";
-import { Pagination } from "@mui/material";
+import { Pagination, Skeleton } from "@mui/material";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useSelector } from "react-redux";
+import { useState } from "react";
 
 const UserTable = () => {
-  const { users, loading, error } = useSelector((state) => state.adminUsers);
+  const { users, loading, searchResults, searchLoading } = useSelector(
+    (state) => state.adminUsers,
+  );
 
+  const hasSearchResults = searchResults?.length > 0;
+  const displayUsers = hasSearchResults ? searchResults : users;
+  const isLoading = loading || searchLoading;
+
+  // Pagination
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 7;
+
+  const startIndex = (page - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedUsers = displayUsers?.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(displayUsers?.length / rowsPerPage) || 1;
   return (
     <>
       <div className="overflow-x-auto mt-5">
@@ -24,62 +39,70 @@ const UserTable = () => {
           </thead>
 
           <tbody>
-            {users?.map((user) => (
-              <tr className="group hover:bg-gray-50 transition-colors">
-                <td className="py-3 flex items-center gap-3">
-                  <img
-                    src={userAvatar}
-                    alt={"User"}
-                    className="w-8 h-8 rounded-full object-cover border border-gray-200"
-                  />
-                  <span className="text-[14px] font-medium text-gray-800">
-                    User
-                  </span>
-                </td>
+            {isLoading
+              ? [1, 2, 3].map((i) => <TableRowSkeleton key={i} />)
+              : paginatedUsers?.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="group hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="py-3 flex items-center gap-3">
+                      <img
+                        src={user.profileImage || userAvatar}
+                        alt={"User"}
+                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                      />
+                      <span className="text-[14px] font-medium text-gray-800">
+                        {user.fullName}
+                      </span>
+                    </td>
 
-                <td className="py-4 px-4 text-[13px] text-gray-600">1</td>
+                    <td className="py-4 px-4 text-[13px] text-gray-600">1</td>
 
-                <td className="py-4 px-4 text-[13px] text-gray-600">
-                  user@example.com
-                </td>
+                    <td className="py-4 px-4 text-[13px] text-gray-600">
+                      {user.email}
+                    </td>
 
-                <td className="py-4 px-4 text-[13px] text-gray-600">MEMBER</td>
+                    <td className="py-4 px-4 text-[13px] text-gray-600">
+                      MEMBER
+                    </td>
 
-                <td className="py-4 px-4 text-[13px] text-gray-600">
-                  <span className="text-[#F55600] py-1 bg-[rgba(245,86,0,.2)] text-[11px] px-2 rounded-md">
-                    ACTIVE
-                  </span>
-                </td>
+                    <td className="py-4 px-4 text-[13px] text-gray-600">
+                      <span className="text-[#F55600] py-1 bg-[rgba(245,86,0,.2)] text-[11px] px-2 rounded-md">
+                        {user.status}
+                      </span>
+                    </td>
 
-                <td className="py-4 px-4 text-[13px] text-gray-600">
-                  Software Engineer
-                </td>
-                <td className="py-4 px-4 text-right ">
-                  <Tooltip title="Delete User">
-                    <IconButton
-                      className="min-w-7.5 min-h-7.5"
-                      size="small"
-                      sx={{
-                        color: "#FA2626",
-                        "&:hover": {
-                          backgroundColor: "rgba(250,38,38,0.1)",
-                        },
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </td>
-              </tr>
-            ))}
+                    <td className="py-4 px-4 text-[13px] text-gray-600">
+                      {user.designation}
+                    </td>
+                    <td className="py-4 px-4 text-right ">
+                      <Tooltip title="Delete User">
+                        <IconButton
+                          className="min-w-7.5 min-h-7.5"
+                          size="small"
+                          sx={{
+                            color: "#FA2626",
+                            "&:hover": {
+                              backgroundColor: "rgba(250,38,38,0.1)",
+                            },
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </td>
+                  </tr>
+                ))}
           </tbody>
         </table>
       </div>
 
       <div className="flex justify-center mt-10 mb-2">
         <Pagination
-          count={4}
-          page={1}
+          count={totalPages}
+          page={page}
+          onChange={(event, value) => setPage(value)}
           shape="rounded"
           sx={{
             "& .MuiPaginationItem-root": {
@@ -100,5 +123,45 @@ const UserTable = () => {
     </>
   );
 };
+
+const TableRowSkeleton = () => (
+  <tr>
+    <td className="py-3 flex items-center gap-3">
+      <Skeleton variant="circular" width={32} height={32} />
+      <Skeleton variant="text" width={90} height={18} />
+    </td>
+
+    <td className="py-4 px-4">
+      <Skeleton variant="text" width={25} />
+    </td>
+
+    <td className="py-4 px-4">
+      <Skeleton variant="text" width={170} />
+    </td>
+
+    <td className="py-4 px-4">
+      <Skeleton variant="text" width={80} />
+    </td>
+
+    <td className="py-4 px-4">
+      <Skeleton
+        variant="rectangular"
+        width={70}
+        height={22}
+        sx={{ borderRadius: "6px" }}
+      />
+    </td>
+
+    <td className="py-4 px-4">
+      <Skeleton variant="text" width={120} />
+    </td>
+
+    <td className="py-4 px-4">
+      <div className="flex justify-end items-center">
+        <Skeleton variant="circular" width={22} height={22} />
+      </div>
+    </td>
+  </tr>
+);
 
 export default UserTable;

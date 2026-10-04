@@ -8,8 +8,7 @@ import com.example.collab_desk.dto.responseDto.UserResponseDto;
 import com.example.collab_desk.entity.Project;
 import com.example.collab_desk.entity.Task;
 import com.example.collab_desk.entity.User;
-import com.example.collab_desk.enums.TaskStatus;
-import com.example.collab_desk.enums.UserRole;
+import com.example.collab_desk.enums.*;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.exception.UnauthorizedException;
 import com.example.collab_desk.repository.TaskRepository;
@@ -164,6 +163,23 @@ public class TaskServiceImpl implements TaskService {
         task.setAssignedTo(newMembers);
 
         return mapToTaskResponseDto(taskRepository.save(task));
+    }
+
+    @Override
+    public List<TaskResponseDto> filterTasks(String status, String priority) {
+        List<Task> tasks;
+
+        if (status != null) {
+            tasks = taskRepository.findByStatus(TaskStatus.valueOf(status));
+        } else if (priority != null) {
+            tasks = taskRepository.findByPriority(TaskPriority.valueOf(priority));
+        } else {
+            tasks = taskRepository.findAllByOrderByCreatedAtDesc();
+        }
+
+        return tasks.stream().
+                map(this::mapToTaskResponseDto).
+                toList();
     }
 
     private TaskResponseDto mapToTaskResponseDto(Task task) {

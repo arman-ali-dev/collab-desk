@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createTaskApi,
+  filterTasksApi,
   getTasksApi,
   updateMembersInTaskApi,
 } from "../../services/admin/taskService";
@@ -107,6 +108,35 @@ export const updateMembersInTask = createAsyncThunk(
   },
 );
 
+export const filterTasks = createAsyncThunk(
+  "adminTasks/filter",
+  async (q, { rejectWithValue }) => {
+    try {
+      const res = await filterTasksApi(q.status, q.priority);
+      console.log("filter results: ", res);
+
+      return res;
+    } catch (err) {
+      let message = "Unexpected error occurred";
+
+      if (err.response) {
+        const status = err.response.status;
+        const serverMsg = err.response.data?.message;
+
+        if (status >= 500) {
+          message = "Server error, please try later";
+        } else {
+          message = serverMsg || "Something went wrong";
+        }
+      } else if (err.request) {
+        message = "Cannot reach server. Check your internet or try later";
+      }
+
+      return rejectWithValue(message);
+    }
+  },
+);
+
 const taskSlice = createSlice({
   name: "adminTasks",
   initialState,
@@ -148,6 +178,17 @@ const taskSlice = createSlice({
       })
       .addCase(updateMembersInTask.rejected, (state, action) => {
         state.updateMemberLoading = false;
+      })
+
+      .addCase(filterTasks.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(filterTasks.fulfilled, (state, action) => {
+        state.loading = false;
+        state.tasks = action.payload;
+      })
+      .addCase(filterTasks.rejected, (state, action) => {
+        state.loading = false;
       });
   },
 });

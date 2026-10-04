@@ -18,7 +18,7 @@ const manu = [
   { label: "My Tasks", icon: checklistIcon, path: "/my-tasks" },
   { label: "Calender", icon: calenderIcon, path: "/calendar" },
   // { label: "Chat", icon: chatIcon, path: "/chat" },
-  // { label: "Drive", icon: driveIcon, path: "/drive" },
+  { label: "Drive", icon: driveIcon, path: "/drive" },
   { label: "Users", icon: usersIcon, path: "/users" },
 ];
 
