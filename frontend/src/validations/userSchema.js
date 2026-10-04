@@ -20,4 +20,15 @@ export const createMemberSchema = yup.object({
   role: yup.string().required("Role is required"),
 });
 
-export const passwordSetupSchema = yup.object({});
+export const passwordSetupSchema = yup.object({
+  token: yup.string().required("Token is required"),
+
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(8, "Password must be 8 characters long"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("password")], "Passwords do not match")
+    .required("Confirm password is required"),
+});

@@ -13,6 +13,7 @@ import { fetchProfile } from "./store/profileSlice";
 import Profile from "./pages/Account/Profile";
 import KanbanBoard from "./pages/Kanban/KanbanBoard";
 import Drive from "./pages/Drive/Drive";
+import PasswordSetup from "./pages/Auth/PasswordSetup";
 
 function App() {
   const dispatch = useDispatch();
@@ -25,9 +26,11 @@ function App() {
   }, [isAuthenticated, dispatch]);
 
   const location = useLocation();
-  const isAuthPage = location.pathname === "/signin";
+  const isAuthPage =
+    location.pathname === "/signin" || location.pathname === "/set-password";
 
   const hideLayout = isAuthPage;
+
   return (
     <>
       <div className="flex h-screen overflow-hidden">
@@ -50,7 +53,7 @@ function App() {
                 path="/projects/:projectId/kanban"
                 element={<KanbanBoard />}
               />
-              <Route path="/set-password" element={<KanbanBoard />} />
+              <Route path="/set-password" element={<PasswordSetup />} />
               <Route element={<Signin />} path="/signin" />
             </Routes>
           </div>

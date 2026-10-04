@@ -5,3 +5,9 @@ export const loginUser = async (data) => {
 
   return response.data;
 };
+
+export const setPasswordApi = async (data) => {
+  const response = await api.put("/auth/set-password", data);
+
+  return response.data;
+};
