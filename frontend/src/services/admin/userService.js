@@ -16,3 +16,12 @@ export const createUserApi = async (data) => {
   const response = await api.post("/api/admin/users/create", data);
   return response.data;
 };
+
+export const filterUsersApi = async (status) => {
+  console.log("status: ", status);
+
+  const res = await api.get("/api/admin/users/filter", {
+    params: { status },
+  });
+  return res.data;
+};

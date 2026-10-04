@@ -45,6 +45,8 @@ public class User {
     @Column(nullable = false)
     private UserStatus status;
 
+    private Boolean deleted = false;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

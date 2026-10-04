@@ -1,4 +1,4 @@
-import { IconButton, Pagination } from "@mui/material";
+import { IconButton, Menu, MenuItem, Pagination } from "@mui/material";
 import plusIcon from "../../assets/plus.png";
 import searchIcon from "../../assets/search.png";
 import filterIcon from "../../assets/filter.png";
@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import {
   clearSearchResults,
+  filterUsers,
   getAllUsers,
   searchUser,
 } from "../../store/admin/userSlice";
@@ -40,6 +41,26 @@ const Users = () => {
   const toggleDrawer = (value) => () => {
     setOpen(value);
   };
+
+  // filter
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null);
+  const openFilterDropDown = Boolean(filterAnchorEl);
+
+  const handleClick = (event) => {
+    setFilterAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseFilterDropDown = () => {
+    setFilterAnchorEl(null);
+  };
+
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    console.log(status);
+
+    dispatch(filterUsers(status));
+  }, [dispatch, status]);
   return (
     <>
       <div className=" mt-4 mx-8 relative">
@@ -59,6 +80,7 @@ const Users = () => {
 
           <div className="flex gap-2">
             <IconButton
+              onClick={handleClick}
               sx={{
                 width: 36,
                 height: 36,
@@ -75,6 +97,45 @@ const Users = () => {
             >
               <img src={filterIcon} alt="" className="w-4" />
             </IconButton>
+
+            <Menu
+              anchorEl={filterAnchorEl}
+              open={openFilterDropDown}
+              onClose={handleCloseFilterDropDown}
+              PaperProps={{
+                sx: { width: 180, borderRadius: "8px" },
+              }}
+            >
+              <MenuItem
+                sx={{ fontSize: "13px", fontWeight: 700 }}
+                onClick={() => {
+                  setStatus("ACTIVE");
+                  handleCloseFilterDropDown();
+                }}
+              >
+                Active
+              </MenuItem>
+
+              <MenuItem
+                sx={{ fontSize: "13px", fontWeight: 700 }}
+                onClick={() => {
+                  setStatus("INACTIVE");
+                  handleCloseFilterDropDown();
+                }}
+              >
+                Inactive
+              </MenuItem>
+
+              <MenuItem
+                sx={{ fontSize: "13px", fontWeight: 700 }}
+                onClick={() => {
+                  setStatus(null);
+                  handleCloseFilterDropDown();
+                }}
+              >
+                Clear Filter
+              </MenuItem>
+            </Menu>
 
             <IconButton
               onClick={toggleDrawer(true)}

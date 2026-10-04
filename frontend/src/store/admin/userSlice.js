@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createUserApi,
+  filterUsersApi,
   getUsers,
   searchUsers,
 } from "../../services/admin/userService";
@@ -92,6 +93,35 @@ export const createUser = createAsyncThunk(
   },
 );
 
+export const filterUsers = createAsyncThunk(
+  "adminUsers/filter",
+  async (q, { rejectWithValue }) => {
+    try {
+      const res = await filterUsersApi(q);
+      console.log("filter results: ", res);
+
+      return res;
+    } catch (err) {
+      let message = "Unexpected error occurred";
+
+      if (err.response) {
+        const status = err.response.status;
+        const serverMsg = err.response.data?.message;
+
+        if (status >= 500) {
+          message = "Server error, please try later";
+        } else {
+          message = serverMsg || "Something went wrong";
+        }
+      } else if (err.request) {
+        message = "Cannot reach server. Check your internet or try later";
+      }
+
+      return rejectWithValue(message);
+    }
+  },
+);
+
 const userSlice = createSlice({
   name: "adminUsers",
   initialState,
@@ -139,6 +169,17 @@ const userSlice = createSlice({
       })
       .addCase(createUser.rejected, (state, action) => {
         state.createLoading = false;
+      })
+
+      .addCase(filterUsers.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(filterUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.users = action.payload;
+      })
+      .addCase(filterUsers.rejected, (state, action) => {
+        state.loading = false;
       });
   },
 });

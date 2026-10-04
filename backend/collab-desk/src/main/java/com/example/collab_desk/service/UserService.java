@@ -27,4 +27,8 @@ public interface UserService {
     UserProfileResponseDto editProfile(EditProfileRequestDto request);
 
     UserProfileResponseDto createMember(CreateMemberRequestDto request);
+
+    void deleteUser(Long id);
+
+    List<UserProfileResponseDto> filterUsers(String status);
 }

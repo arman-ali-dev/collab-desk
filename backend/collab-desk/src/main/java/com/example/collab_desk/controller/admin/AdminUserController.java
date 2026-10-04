@@ -37,11 +37,21 @@ public class AdminUserController {
     @PostMapping("/create")
     public ResponseEntity<UserProfileResponseDto> createMemberHandler(
             @Valid @RequestBody CreateMemberRequestDto request) {
-        System.out.println(request.getEmail());
-        System.out.println(request.getFullName());
-        System.out.println(request.getDesignation());
-        System.out.println(request.getRole());
-       UserProfileResponseDto response = userService.createMember(request);
-       return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        UserProfileResponseDto response = userService.createMember(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMemberHandler(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<UserProfileResponseDto>> filterUsersHandler(
+            @RequestParam(required = false) String status) {
+        List<UserProfileResponseDto> response = userService.filterUsers(status);
+        return ResponseEntity.ok(response);
+    }
+
 }

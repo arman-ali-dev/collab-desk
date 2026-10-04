@@ -83,7 +83,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserProfileResponseDto> getAllUsers() {
-        return userRepository.findAllByOrderByCreatedAtDesc().stream().map(this::mapToUserProfileResponse).toList();
+        return userRepository.findAllByOrderByCreatedAtDesc()
+                .stream().map(this::mapToUserProfileResponse).toList();
     }
 
     @Override
@@ -139,6 +140,25 @@ public class UserServiceImpl implements UserService {
         emailService.sendInvitation(email, fullName, link);
 
         return mapToUserProfileResponse(savedUser);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        User existingUser = getUser(id);
+        existingUser.setDeleted(true);
+        userRepository.save(existingUser);
+    }
+
+    @Override
+    public List<UserProfileResponseDto> filterUsers(String status) {
+        List<User> users;
+
+        if (status != null) {
+            users = userRepository.findByStatus(UserStatus.valueOf(status));
+        } else {
+            users = userRepository.findAllByOrderByCreatedAtDesc();
+        }
+        return users.stream().map(this::mapToUserProfileResponse).toList();
     }
 
     private UserResponseDto mapToUserResponse(User user) {
