@@ -1,14 +1,25 @@
 import userAvatar from "../../assets/userAvatar.png";
-import { Pagination, Skeleton } from "@mui/material";
+import {
+  Alert,
+  CircularProgress,
+  Pagination,
+  Skeleton,
+  Snackbar,
+} from "@mui/material";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { use, useState } from "react";
+import { deleteUser } from "../../store/admin/userSlice";
 
 const UserTable = () => {
-  const { users, loading, searchResults, searchLoading } = useSelector(
-    (state) => state.adminUsers,
-  );
+  const { users, deleteUserId, loading, searchResults, searchLoading } =
+    useSelector((state) => state.adminUsers);
+  const dispatch = useDispatch();
+
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
+  const [snackType, setSnackType] = useState("success");
 
   const hasSearchResults = searchResults?.length > 0;
   const displayUsers = hasSearchResults ? searchResults : users;
@@ -22,6 +33,15 @@ const UserTable = () => {
   const endIndex = startIndex + rowsPerPage;
   const paginatedUsers = displayUsers?.slice(startIndex, endIndex);
   const totalPages = Math.ceil(displayUsers?.length / rowsPerPage) || 1;
+
+  // Delete User
+
+  const handleDelete = async (id) => {
+    await dispatch(deleteUser(id)).unwrap();
+    setOpenSnack(true);
+    setSnackType("success");
+    setSnackMessage("User deleted");
+  };
   return (
     <>
       <div className="overflow-x-auto mt-5">
@@ -79,6 +99,8 @@ const UserTable = () => {
                     <td className="py-4 px-4 text-right ">
                       <Tooltip title="Delete User">
                         <IconButton
+                          onClick={() => handleDelete(user.id)}
+                          disabled={deleteUserId === user.id}
                           className="min-w-7.5 min-h-7.5"
                           size="small"
                           sx={{
@@ -88,7 +110,10 @@ const UserTable = () => {
                             },
                           }}
                         >
-                          <DeleteIcon fontSize="small" />
+                          {deleteUserId === user.id && (
+                            <CircularProgress size={13} sx={{ color: "red" }} />
+                          )}
+                          {!deleteUserId && <DeleteIcon fontSize="small" />}
                         </IconButton>
                       </Tooltip>
                     </td>
@@ -120,6 +145,21 @@ const UserTable = () => {
           }}
         />
       </div>
+
+      <Snackbar
+        open={openSnack}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnack(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setOpenSnack(false)}
+          severity={snackType}
+          sx={{ width: "100%", fontSize: "13px" }}
+        >
+          {snackMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

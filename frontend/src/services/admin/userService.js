@@ -17,6 +17,10 @@ export const createUserApi = async (data) => {
   return response.data;
 };
 
+export const deleteUserApi = async (id) => {
+  await api.delete(`/api/admin/users/${id}`);
+};
+
 export const filterUsersApi = async (status) => {
   console.log("status: ", status);
 

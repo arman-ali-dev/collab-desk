@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createUserApi,
+  deleteUserApi,
   filterUsersApi,
   getUsers,
   searchUsers,
@@ -16,6 +17,8 @@ const initialState = {
   searchError: null,
 
   createLoading: false,
+
+  deleteUserId: null,
 };
 
 export const getAllUsers = createAsyncThunk(
@@ -52,6 +55,19 @@ export const searchUser = createAsyncThunk(
       const res = await searchUsers(query);
 
       return res;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Search failed");
+    }
+  },
+);
+
+export const deleteUser = createAsyncThunk(
+  "adminUser/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      await deleteUserApi(id);
+
+      return id;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Search failed");
     }
@@ -180,6 +196,17 @@ const userSlice = createSlice({
       })
       .addCase(filterUsers.rejected, (state, action) => {
         state.loading = false;
+      })
+
+      .addCase(deleteUser.pending, (state, action) => {
+        state.deleteUserId = action.meta.arg;
+      })
+      .addCase(deleteUser.fulfilled, (state, action) => {
+        state.deleteUserId = null;
+        state.users = state.users.filter((u) => u.id !== action.payload);
+      })
+      .addCase(deleteUser.rejected, (state, action) => {
+        state.deleteUserId = null;
       });
   },
 });

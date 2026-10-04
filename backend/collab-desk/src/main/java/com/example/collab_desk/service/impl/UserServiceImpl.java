@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserProfileResponseDto> getAllUsers() {
-        return userRepository.findAllByOrderByCreatedAtDesc()
+        return userRepository.findAllByDeletedFalseOrderByCreatedAtDesc()
                 .stream().map(this::mapToUserProfileResponse).toList();
     }
 
@@ -154,9 +154,9 @@ public class UserServiceImpl implements UserService {
         List<User> users;
 
         if (status != null) {
-            users = userRepository.findByStatus(UserStatus.valueOf(status));
+            users = userRepository.findByStatusAndDeletedFalse(UserStatus.valueOf(status));
         } else {
-            users = userRepository.findAllByOrderByCreatedAtDesc();
+            users = userRepository.findAllByDeletedFalseOrderByCreatedAtDesc();
         }
         return users.stream().map(this::mapToUserProfileResponse).toList();
     }
