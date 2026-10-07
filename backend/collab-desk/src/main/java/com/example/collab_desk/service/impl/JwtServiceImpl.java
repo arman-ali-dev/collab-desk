@@ -1,13 +1,12 @@
 package com.example.collab_desk.service.impl;
 
+import com.example.collab_desk.entity.User;
 import com.example.collab_desk.service.JwtService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -17,14 +16,17 @@ import java.util.List;
 public class JwtServiceImpl implements JwtService {
 
     private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
     private final String issuer;
     private final Long expiry;
 
     public JwtServiceImpl(JwtEncoder jwtEncoder,
+                          JwtDecoder jwtDecoder,
                           @Value("${jwt.issuer}") String issuer,
                           @Value("${jwt.expiry}") Long expiry
     ) {
         this.jwtEncoder = jwtEncoder;
+        this.jwtDecoder = jwtDecoder;
         this.issuer = issuer;
         this.expiry = expiry;
     }
@@ -51,4 +53,26 @@ public class JwtServiceImpl implements JwtService {
 
         return jwt.getTokenValue();
     }
+
+    @Override
+    public String extractUsername(String token) {
+        return jwtDecoder.decode(token).getSubject();
+    }
+
+    @Override
+    public boolean isTokenValid(String token, UserDetails user) {
+        try {
+            Jwt jwt = jwtDecoder.decode(token);
+            Instant exp = jwt.getExpiresAt();
+
+            boolean sameUser = user.getUsername().equals(jwt.getSubject());
+            boolean notExpired = exp != null && exp.isAfter(Instant.now());
+
+            return sameUser && notExpired;
+        } catch (JwtException e) {
+            return false;
+        }
+    }
+
+
 }

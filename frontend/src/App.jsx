@@ -14,6 +14,7 @@ import Profile from "./pages/Account/Profile";
 import KanbanBoard from "./pages/Kanban/KanbanBoard";
 import Drive from "./pages/Drive/Drive";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
+import Chat from "./pages/Chat/Chat";
 
 function App() {
   const dispatch = useDispatch();
@@ -49,6 +50,7 @@ function App() {
               <Route element={<MyTasks />} path="/my-tasks" />
               <Route element={<Profile />} path="/profile" />
               <Route element={<Drive />} path="/drive" />
+              <Route element={<Chat />} path="/chat" />
               <Route
                 path="/projects/:projectId/kanban"
                 element={<KanbanBoard />}

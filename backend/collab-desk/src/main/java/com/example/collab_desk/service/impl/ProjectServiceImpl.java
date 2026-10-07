@@ -4,12 +4,15 @@ import com.example.collab_desk.dto.requestDto.CreateProjectRequest;
 import com.example.collab_desk.dto.requestDto.UpdateProjectRequest;
 import com.example.collab_desk.dto.responseDto.ProjectResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
+import com.example.collab_desk.entity.ChatRoom;
 import com.example.collab_desk.entity.Project;
 import com.example.collab_desk.entity.User;
 import com.example.collab_desk.enums.ProjectPriority;
 import com.example.collab_desk.enums.ProjectStatus;
 import com.example.collab_desk.exception.ResourceNotFoundException;
+import com.example.collab_desk.repository.ChatRoomRepository;
 import com.example.collab_desk.repository.ProjectRepository;
+import com.example.collab_desk.service.ChatRoomService;
 import com.example.collab_desk.service.ProjectService;
 import com.example.collab_desk.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserService userService;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomService chatRoomService;
 
     @Override
     @Transactional
@@ -49,7 +54,10 @@ public class ProjectServiceImpl implements ProjectService {
             project.setUrl(request.getUrl());
         }
 
-        return mapToProjectResponse(projectRepository.save(project));
+        Project savedProject = projectRepository.save(project);
+        chatRoomService.createRoom(savedProject);
+
+        return mapToProjectResponse(savedProject);
     }
 
     @Override

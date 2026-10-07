@@ -416,7 +416,7 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
                     displayEmpty
                     className={selectClass}
                     sx={selectSx}
-                    {...register("category")}
+                    {...register("priority")}
                   >
                     <MenuItem value="">Select Priority</MenuItem>
                     <MenuItem value="HIGH">High</MenuItem>
