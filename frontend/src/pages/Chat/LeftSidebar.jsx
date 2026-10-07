@@ -7,8 +7,18 @@ import downArrow from "../../assets/arrowDown.png";
 import tagIcon from "../../assets/tag.png";
 import groupIcon from "../../assets/group.png";
 import userAvatar from "../../assets/userAvatar.png";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchChatRooms } from "../../store/chatSlice";
 
 const LeftSidebar = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchChatRooms());
+  }, [dispatch]);
+
+  const { chatRooms } = useSelector((state) => state.chat);
   return (
     <>
       <div className="h-full w-full px-4 py-6 border-[rgba(200,200,200,.5)] border-r overflow-y-auto chat-scroll">
@@ -45,14 +55,16 @@ const LeftSidebar = () => {
             <img className="w-2 h-2 cursor-no-drop" src={downArrow} alt="" />
           </div>
           <ul className="space-y-2 border-b border-[rgba(200,200,200,.5)] pb-4 mt-3">
-            <li className="relative cursor-pointer">
-              <span
-                className={`text-[13px] ${true ? "opacity-75" : "font-medium"} flex items-center gap-1.5 hover:opacity-100 transition-all duration-75`}
-              >
-                <img className="w-3.5 h-3.5" src={tagIcon} alt="" />
-                project 1
-              </span>
-            </li>
+            {chatRooms?.map((r) => (
+              <li key={r.id} className="relative cursor-pointer">
+                <span
+                  className={`text-[13px] ${true ? "opacity-75" : "font-medium"} flex items-center gap-1.5 hover:opacity-100 transition-all duration-75`}
+                >
+                  <img className="w-3.5 h-3.5" src={tagIcon} alt="" />
+                  {r.project.title}
+                </span>
+              </li>
+            ))}
           </ul>
         </div>
 
