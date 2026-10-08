@@ -17,6 +17,7 @@ import adminProjectReducer from "./admin/projectSlice";
 import profileReducer from "./profileSlice";
 import adminTaskReducer from "./admin/taskSlice";
 import memberTaskReducer from "./member/taskSlice";
+import chatRoomReducer from "./chatRoomSlice";
 import chatReducer from "./chatSlice";
 
 const storage = storageModule.default;
@@ -24,6 +25,7 @@ const storage = storageModule.default;
 const rootReducer = combineReducers({
   auth: authReducer,
   profile: profileReducer,
+  chatRoom: chatRoomReducer,
   chat: chatReducer,
 
   memberProjects: projectReducer,

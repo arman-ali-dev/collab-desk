@@ -7,7 +7,7 @@ export const stompClient = new Client({
   heartbeatOutgoing: 10000,
   beforeConnect: () => {
     stompClient.connectHeaders = {
-      Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     };
   },
 });

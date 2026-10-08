@@ -4,14 +4,59 @@ import attachFileIcon from "../../assets/attach.png";
 import lockIcon from "../../assets/lock.png";
 import ChatHeader from "./ChatHeader";
 import ChatArea from "./ChatArea";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { clearSelectedChatRoom } from "../../store/chatRoomSlice";
+import useStompConnection from "../../hooks/UseStompConnection";
+import { sendMessage } from "../../util/stompClient";
+import useRoomSubscription from "../../hooks/useRoomSubscription";
 
 const ChatContainer = () => {
+  const dispatch = useDispatch();
+  const { selectedChatRoom } = useSelector((state) => state.chatRoom);
+  useStompConnection(selectedChatRoom?.id);
+  useRoomSubscription(selectedChatRoom?.id);
+
+  useEffect(() => {
+    return () => dispatch(clearSelectedChatRoom());
+  }, []);
+
+  // Send Message
+
+  const [text, setText] = useState("");
+  const { connected } = useSelector((state) => state.chat);
+
+  const handleSend = (e) => {
+    console.log(e);
+
+    e.preventDefault();
+    const content = text.trim();
+    console.log("Content", content);
+
+    if (!content || !selectedChatRoom?.id || !connected) return;
+
+    const ok = sendMessage({
+      roomId: selectedChatRoom.id,
+      type: "TEXT",
+      content,
+    });
+
+    console.log("Ok", ok);
+
+    if (ok) setText("");
+  };
+
+  const { profile } = useSelector((state) => state.profile);
+
+  const canView =
+    profile?.role === "ADMIN" ||
+    selectedChatRoom?.project?.members.some((u) => u.id === profile.id);
   return (
     <>
       <div className="h-full w-full flex flex-col relative min-h-0">
-        <ChatHeader />
+        <ChatHeader selectedChatRoom={selectedChatRoom} />
 
-        {false ? (
+        {!canView ? (
           <div className="flex-1 flex flex-col relative">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="px-4 opacity-30 blur-sm">
@@ -50,9 +95,15 @@ const ChatContainer = () => {
             </div>
 
             <div className="pt-3 px-4">
-              <form className="relative">
+              <form onSubmit={handleSend} className="relative">
                 <input
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
                   type="text"
+                  disabled={!connected}
+                  placeholder={
+                    connected ? "Type a message..." : "Connecting..."
+                  }
                   className="text-[13px] outline-0 border border-gray-300 w-full py-2.5 pl-10 pr-12 rounded-md disabled:opacity-60"
                 />
                 <input

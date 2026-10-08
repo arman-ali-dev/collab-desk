@@ -1,5 +1,7 @@
 import React from "react";
 import userAvatar from "../../assets/userAvatar.png";
+import { useSelector } from "react-redux";
+import useRoomSubscription from "../../hooks/useRoomSubscription";
 
 const currentUserId = 1;
 

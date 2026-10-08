@@ -2,6 +2,7 @@ import chatIcon from "../../assets/chat.png";
 import LeftSidebar from "./LeftSidebar";
 import ChatContainer from "./ChatContainer";
 import RightSidebar from "./RightSidebar";
+import { useSelector } from "react-redux";
 
 const EmptyState = () => (
   <div className="h-full flex flex-col items-center justify-center text-center px-6">
@@ -16,6 +17,7 @@ const EmptyState = () => (
 );
 
 const Chat = () => {
+  const { selectedChatRoom } = useSelector((state) => state.chatRoom);
   return (
     <div className="bg-white rounded-lg shadow h-[87vh] m-4 overflow-hidden">
       <div className="grid grid-cols-9 h-full min-h-0">
@@ -23,7 +25,7 @@ const Chat = () => {
           <LeftSidebar />
         </div>
 
-        {true ? (
+        {selectedChatRoom?.id ? (
           <>
             <div className="col-span-5 h-full min-h-0 overflow-hidden">
               <ChatContainer />

@@ -4,13 +4,13 @@ import tagIcon from "../../assets/tag.png";
 import userAvatar from "../../assets/userAvatar.png";
 import { IconButton } from "@mui/material";
 
-const ChatHeader = () => {
+const ChatHeader = ({ selectedChatRoom }) => {
   return (
     <div className="px-4 flex justify-between items-center pb-1.5 pt-2 border-b border-[rgba(200,200,200,.5)]">
       <div className="flex items-center gap-2.5">
         {true ? (
           <img
-            src={userAvatar}
+            src={selectedChatRoom?.project.logo}
             alt={"User"}
             className="w-6 h-6 rounded-full object-cover shrink-0"
           />
@@ -19,8 +19,13 @@ const ChatHeader = () => {
         )}
 
         <div>
-          <p className="text-[13px] font-medium leading-tight">Jhon</p>
-          <p className="text-[11px] opacity-55">hello world</p>
+          <p className="text-[13px] font-medium leading-tight">
+            {selectedChatRoom?.project.title}
+          </p>
+          <p className="text-[11px] opacity-55">
+            {selectedChatRoom?.project.members.length} Member
+            {selectedChatRoom?.project.members.length > 1 && "s"}
+          </p>
         </div>
       </div>
 

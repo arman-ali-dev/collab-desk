@@ -1,47 +1,28 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getAllChatRooms } from "../services/chatService";
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  chatRooms: [],
-  loading: false,
-  error: null,
+  connected: false,
+  messages: [],
 };
-
-export const fetchChatRooms = createAsyncThunk(
-  "chat/fetch",
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await getAllChatRooms();
-
-      console.log("chat rooms", res);
-      return res;
-    } catch (err) {
-      console.log(err);
-
-      return rejectWithValue(err.response?.data?.message || "failed");
-    }
-  },
-);
 
 const chatSlice = createSlice({
   name: "chat",
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchChatRooms.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchChatRooms.fulfilled, (state, action) => {
-        state.loading = false;
-        state.chatRooms = action.payload;
-      })
-      .addCase(fetchChatRooms.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Something went wrong";
-      });
+  reducers: {
+    setConnected: (state, action) => {
+      state.connected = action.payload;
+    },
+    clearMessages: (state) => {
+      state.messages = [];
+    },
+    upsertMessage: (state, action) => {
+      const m = action.payload;
+      const i = state.messages.findIndex((x) => x.id === m.id);
+      if (i >= 0) state.messages[i] = m;
+      else state.messages.push(m);
+    },
   },
 });
 
+export const { clearMessages, setConnected, upsertMessage } = chatSlice.actions;
 export default chatSlice.reducer;

@@ -4,8 +4,10 @@ import filesIcon from "../../assets/files.png";
 import tagIcon from "../../assets/tag.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { useSelector } from "react-redux";
 
 const RightSidebar = () => {
+  const { selectedChatRoom } = useSelector((state) => state.chatRoom);
   return (
     <div className="h-full w-full px-4 py-6 border-[rgba(200,200,200,.5)] border-l overflow-y-auto relative">
       <div className="border-b border-[rgba(200,200,200,.5)] pb-4 mb-3">
@@ -13,18 +15,23 @@ const RightSidebar = () => {
           <img src={tagIcon} alt="tag icon" className="w-5" />
         </div>
         <h3 className="text-center mt-2 font-medium text-[13px]">
-          Website Redesign
+          {selectedChatRoom?.project.title}
         </h3>
         <p className="text-center font-medium text-[11px] opacity-65">
-          6 Members
+          {selectedChatRoom?.project.members.length} Member
+          {selectedChatRoom?.project.members.length > 1 && "s"}
         </p>
       </div>
 
       <div className="border-b border-[rgba(200,200,200,.5)] pb-5 mb-4">
         <h3 className="font-medium text-[13px]">Description</h3>
         <p className="text-[12px]">
-          Redesign of the company website with a new landing page, pricing
-          section and...
+          {selectedChatRoom?.project.description
+            .split(" ")
+            .slice(0, 13)
+            .join(" ")}
+          {selectedChatRoom?.project.description.split(" ").length > 13 &&
+            "..."}
         </p>
       </div>
 
