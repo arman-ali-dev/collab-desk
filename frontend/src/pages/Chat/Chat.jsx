@@ -2,7 +2,9 @@ import chatIcon from "../../assets/chat.png";
 import LeftSidebar from "./LeftSidebar";
 import ChatContainer from "./ChatContainer";
 import RightSidebar from "./RightSidebar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { clearSelectedChatRoom } from "../../store/chatRoomSlice";
 
 const EmptyState = () => (
   <div className="h-full flex flex-col items-center justify-center text-center px-6">
@@ -17,7 +19,13 @@ const EmptyState = () => (
 );
 
 const Chat = () => {
+  const dispatch = useDispatch();
   const { selectedChatRoom } = useSelector((state) => state.chatRoom);
+
+  useEffect(() => {
+    return () => dispatch(clearSelectedChatRoom());
+  }, [dispatch]);
+
   return (
     <div className="bg-white rounded-lg shadow h-[87vh] m-4 overflow-hidden">
       <div className="grid grid-cols-9 h-full min-h-0">
@@ -25,7 +33,7 @@ const Chat = () => {
           <LeftSidebar />
         </div>
 
-        {selectedChatRoom?.id ? (
+        {selectedChatRoom ? (
           <>
             <div className="col-span-5 h-full min-h-0 overflow-hidden">
               <ChatContainer />

@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
@@ -45,19 +47,29 @@ public class ChatServiceImpl implements ChatService {
         message.setCaption(req.getCaption());
         message.setFilename(req.getFilename());
 
-        messageRepository.save(message);
+        return mapToMessageResponseDto(messageRepository.save(message));
+    }
 
+    @Override
+    public List<MessageResponseDto> getAllByChatRoom(Long chatRoomId) {
+        return messageRepository.findByChatRoom_Id(chatRoomId)
+                .stream().map(this::mapToMessageResponseDto).toList();
+    }
+
+
+    private MessageResponseDto mapToMessageResponseDto(Message message) {
         return new MessageResponseDto(
                 message.getId(),
                 message.getChatRoom().getId(),
                 message.getContent(),
                 message.getType(),
-                new SenderResponseDto(sender.getId(), sender.getFullName(), sender.getProfileImage()),
+                new SenderResponseDto(message.getSender().getId(),
+                        message.getSender().getFullName(),
+                        message.getSender().getProfileImage()),
                 message.getCaption(),
                 message.getFilename(),
                 message.getSentAt()
         );
     }
-
 
 }

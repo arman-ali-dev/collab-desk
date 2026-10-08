@@ -1,6 +1,6 @@
 import Skeleton from "@mui/material/Skeleton";
 import userAvatar from "../../assets/userAvatar.png";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import speechIcon from "../../assets/speech.png";
 import heartIcon from "../../assets/like.png";
@@ -76,6 +76,8 @@ const KanbanBoard = () => {
     );
   };
 
+  const navigate = useNavigate();
+
   return (
     <>
       <div className="mt-4 mx-8 relative flex flex-col h-full">
@@ -119,7 +121,7 @@ const KanbanBoard = () => {
               </>
             ) : (
               <>
-                <IconButton sx={iconBtnStyle}>
+                <IconButton onClick={() => navigate("/chat")} sx={iconBtnStyle}>
                   <img src={speechIcon} alt="" className="w-4" />
                 </IconButton>
 

@@ -17,12 +17,12 @@ export function sendMessage({
   type = "TEXT",
   content,
   caption,
-  fileName,
+  filename,
 }) {
   if (!stompClient.connected) return false;
   stompClient.publish({
     destination: "/app/chat.send",
-    body: JSON.stringify({ roomId, type, content, caption, fileName }),
+    body: JSON.stringify({ roomId, type, content, caption, filename }),
   });
   return true;
 }

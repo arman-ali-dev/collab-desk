@@ -108,7 +108,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ExceptionResponseDto> handleMethodArgumentTypeMismatchException(
-            MethodArgumentNotValidException ex, HttpServletRequest request) {
+            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
 
         ExceptionResponseDto responseDto = new ExceptionResponseDto(
                 LocalDateTime.now(),

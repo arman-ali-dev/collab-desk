@@ -74,34 +74,32 @@ const LeftSidebar = () => {
           </ul>
         </div>
 
-        <div className="mb-3.5">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="flex gap-2 items-center font-medium">
-              <img className="w-4 h-4" src={groupIcon} alt="" />
-              <span className="text-[13px] mt-1">Users</span>
-            </h3>
-            <img
-              className="w-2 h-2 mt-1 cursor-no-drop"
-              src={downArrow}
-              alt=""
-            />
-          </div>
+        {selectedChatRoom && (
+          <div className="mb-3.5">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="flex gap-2 items-center font-medium">
+                <img className="w-4 h-4" src={groupIcon} alt="" />
+                <span className="text-[13px] mt-1">Team Members</span>
+              </h3>
+            </div>
 
-          <ul className="space-y-2">
-            <li
-              className={`flex cursor-pointer items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-[#F5F5F5] transition-colors ${
-                "PRIVATE" === "PRIVATE" && true ? "bg-[#F0F4FF]" : ""
-              }`}
-            >
-              <img
-                src={userAvatar}
-                alt="user"
-                className="w-6 h-6 rounded-full object-cover shrink-0"
-              />
-              <p className="text-[13px] truncate">User</p>
-            </li>
-          </ul>
-        </div>
+            <ul className="space-y-2">
+              {selectedChatRoom?.project.members.map((u) => (
+                <li
+                  key={u.id}
+                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors"
+                >
+                  <img
+                    src={u.profileImage || userAvatar}
+                    alt="user"
+                    className="w-6 h-6 rounded-full object-cover shrink-0"
+                  />
+                  <p className="text-[13px] truncate">{u.fullName}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </>
   );
