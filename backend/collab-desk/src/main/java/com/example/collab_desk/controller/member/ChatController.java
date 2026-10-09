@@ -20,7 +20,6 @@ public class ChatController {
 
     @MessageMapping("/chat.send")
     public void send(@Payload SendMessageRequest req, Principal principal) {
-        System.out.println("Hello SIr tkleklg mkdl");
         MessageResponseDto saved = chatService.saveMessage(req, principal.getName());
         messagingTemplate.convertAndSend("/topic/room." + saved.getRoomId(), saved);
     }
