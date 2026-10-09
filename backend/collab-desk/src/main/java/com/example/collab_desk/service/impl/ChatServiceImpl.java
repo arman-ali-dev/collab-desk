@@ -63,7 +63,7 @@ public class ChatServiceImpl implements ChatService {
 
         for (User member : room.getProject().getMembers()) {
             if (member.getId().equals(sender.getId())) continue;
-            notificationService.notify(member, NotificationType.NEW_MESSAGE, title, body);
+            notificationService.notify(member, NotificationType.MESSAGE, title, body);
         }
 
         return mapToMessageResponseDto(messageRepository.save(message));

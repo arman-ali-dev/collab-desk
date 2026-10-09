@@ -12,6 +12,7 @@ import com.example.collab_desk.enums.*;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.exception.UnauthorizedException;
 import com.example.collab_desk.repository.TaskRepository;
+import com.example.collab_desk.service.NotificationService;
 import com.example.collab_desk.service.ProjectService;
 import com.example.collab_desk.service.TaskService;
 import com.example.collab_desk.service.UserService;
@@ -32,6 +33,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final UserService userService;
     private final ProjectService projectService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -50,6 +52,14 @@ public class TaskServiceImpl implements TaskService {
 
         task.setProject(project);
         task.setAssignedTo(users);
+
+        String title = "New task assigned in " + project.getTitle();
+        String message = "You have been assigned a new task in the project " + project.getTitle() + ".";
+
+        for (User member : task.getAssignedTo()) {
+            notificationService.notify(member, NotificationType.TASK, title, message);
+        }
+
         return mapToTaskResponseDto(taskRepository.save(task));
     }
 

@@ -43,7 +43,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public List<NotificationResponseDto> getNotifications() {
         User currentUser = userService.getCurrentUser();
-        return notificationRepository.findByUser_Id(currentUser.getId())
+        return notificationRepository.findByUser_IdAndReadAtIsNullOrderByIdDesc(currentUser.getId())
                 .stream().map(this::mapToNotificationResponseDto).toList();
     }
 
@@ -60,7 +60,7 @@ public class NotificationServiceImpl implements NotificationService {
                 notification.getType(),
                 notification.getTitle(),
                 notification.getMessage(),
-                notification.getReadAt(),
+                true,
                 notification.getCreatedAt()
         );
     }

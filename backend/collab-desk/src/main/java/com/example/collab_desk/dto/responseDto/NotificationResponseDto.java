@@ -15,6 +15,6 @@ public class NotificationResponseDto {
     private NotificationType type;
     private String title;
     private String message;
-    private LocalDateTime readAt;
+    private boolean readAt;
     private LocalDateTime createdAt;
 }

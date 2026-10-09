@@ -7,12 +7,14 @@ import com.example.collab_desk.dto.responseDto.UserResponseDto;
 import com.example.collab_desk.entity.ChatRoom;
 import com.example.collab_desk.entity.Project;
 import com.example.collab_desk.entity.User;
+import com.example.collab_desk.enums.NotificationType;
 import com.example.collab_desk.enums.ProjectPriority;
 import com.example.collab_desk.enums.ProjectStatus;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.repository.ChatRoomRepository;
 import com.example.collab_desk.repository.ProjectRepository;
 import com.example.collab_desk.service.ChatRoomService;
+import com.example.collab_desk.service.NotificationService;
 import com.example.collab_desk.service.ProjectService;
 import com.example.collab_desk.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +30,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserService userService;
-    private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomService chatRoomService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -56,6 +58,13 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project savedProject = projectRepository.save(project);
         chatRoomService.createRoom(savedProject);
+
+        String title = "Added to project: " + project.getTitle();
+        String message = "You have been added as a member of the project " + project.getTitle() + ".";
+
+        for (User member : project.getMembers()) {
+            notificationService.notify(member, NotificationType.PROJECT, title, message);
+        }
 
         return mapToProjectResponse(savedProject);
     }
