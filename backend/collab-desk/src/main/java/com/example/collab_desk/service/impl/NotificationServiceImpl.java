@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,13 @@ public class NotificationServiceImpl implements NotificationService {
 
         messagingTemplate.convertAndSendToUser(recipient.getEmail(),
                 "/queue/notifications", response);
+    }
+
+    @Override
+    public List<NotificationResponseDto> getNotifications() {
+        User currentUser = userService.getCurrentUser();
+        return notificationRepository.findByUser_Id(currentUser.getId())
+                .stream().map(this::mapToNotificationResponseDto).toList();
     }
 
     @Override
