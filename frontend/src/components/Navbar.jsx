@@ -5,10 +5,11 @@ import bellIcon from "../assets/bell.png";
 import userAvatar from "../assets/userAvatar.png";
 
 import { Avatar, Tooltip } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CreateNewTaskForm from "../pages/Dashboard/CreateNewTaskForm";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import Notifications from "./Notifications";
 
 const Navbar = () => {
   const { profile } = useSelector((state) => state.profile);
@@ -20,6 +21,27 @@ const Navbar = () => {
     setOpen(value);
   };
 
+  // Notifications
+  const { notifications } = useSelector((state) => state.notification);
+  const notificationRef = useRef(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(e.target)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   return (
     <>
       <div
@@ -71,22 +93,34 @@ const Navbar = () => {
               </div>
             </Tooltip>
 
-            <Tooltip title="Notifications">
-              <div className="nav-icon-btn w-9 cursor-pointer relative h-9 bg-[#EFEFEF] rounded-lg flex justify-center items-center">
-                <img
-                  className="w-4"
-                  src={bellIcon}
-                  alt=""
-                  style={{
-                    transition: "transform 0.3s ease",
-                  }}
-                />
+            <div className="relative">
+              <Tooltip
+                onClick={() => setShowNotifications(true)}
+                title="Notifications"
+              >
+                <div className="nav-icon-btn w-9 cursor-pointer relative h-9 bg-[#EFEFEF] rounded-lg flex justify-center items-center">
+                  <img
+                    className="w-4"
+                    src={bellIcon}
+                    alt=""
+                    style={{
+                      transition: "transform 0.3s ease",
+                    }}
+                  />
 
-                <span className="badge-dot bg-[#FA2626] absolute -top-0.5 -right-1 opacity-80 flex justify-center items-center text-[9px] text-white h-3.5 w-3.5 rounded-full">
-                  2
-                </span>
-              </div>
-            </Tooltip>
+                  {notifications?.length > 0 && (
+                    <span className="badge-dot bg-[#FA2626] absolute -top-0.5 -right-1 opacity-80 flex justify-center items-center text-[9px] text-white h-3.5 w-3.5 rounded-full">
+                      {notifications?.length}
+                    </span>
+                  )}
+                </div>
+              </Tooltip>
+
+              <Notifications
+                notificationRef={notificationRef}
+                showNotifications={showNotifications}
+              />
+            </div>
 
             <Tooltip onClick={toggleDrawer(true)} title="Create Task">
               <div className="w-9 h-9 rounded-lg flex justify-center items-center nav-icon-btn bg-[#EFEFEF] cursor-pointer">

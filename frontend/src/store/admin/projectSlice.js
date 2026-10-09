@@ -52,14 +52,10 @@ export const updateProject = createAsyncThunk(
     try {
       const res = await updateProjectApi(id, data);
 
-      console.log(res);
-
       dispatch(editProject(res));
 
       return res;
     } catch (err) {
-      console.log(err);
-
       let message = "Unexpected error occurred";
 
       if (err.response) {
@@ -91,8 +87,6 @@ export const deleteProject = createAsyncThunk(
 
       return id;
     } catch (err) {
-      console.log(err);
-
       let message = "Unexpected error occurred";
 
       if (err.response) {

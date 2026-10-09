@@ -15,11 +15,8 @@ export const fetchChatRooms = createAsyncThunk(
     try {
       const res = await getAllChatRooms();
 
-      console.log("chat rooms", res);
       return res;
     } catch (err) {
-      console.log(err);
-
       return rejectWithValue(err.response?.data?.message || "failed");
     }
   },

@@ -79,12 +79,9 @@ export const createUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const res = await createUserApi(credentials);
-      console.log("User creaeted ", res);
 
       return res;
     } catch (err) {
-      console.log(err);
-
       let message = "Unexpected error occurred";
 
       if (err.response) {
@@ -114,7 +111,6 @@ export const filterUsers = createAsyncThunk(
   async (q, { rejectWithValue }) => {
     try {
       const res = await filterUsersApi(q);
-      console.log("filter results: ", res);
 
       return res;
     } catch (err) {

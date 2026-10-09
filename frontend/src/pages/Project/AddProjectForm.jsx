@@ -125,8 +125,6 @@ const AddProjectForm = ({ toggleDrawer, open }) => {
       setLogo(logo);
       setValue("logo", logo);
     } catch (err) {
-      console.log(err);
-
       setSnackType("error");
       setSnackMessage(err.message || "Image upload failed");
       setOpenSnack(true);

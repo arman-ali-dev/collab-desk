@@ -57,8 +57,6 @@ const Users = () => {
   const [status, setStatus] = useState(null);
 
   useEffect(() => {
-    console.log(status);
-
     dispatch(filterUsers(status));
   }, [dispatch, status]);
   return (

@@ -33,11 +33,9 @@ const MyTasks = () => {
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     )
-      console.log(draggableId, destination.draggableId);
-
-    dispatch(
-      updateTaskStatus({ id: draggableId, status: destination.droppableId }),
-    );
+      dispatch(
+        updateTaskStatus({ id: draggableId, status: destination.droppableId }),
+      );
     return;
   };
 

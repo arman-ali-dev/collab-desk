@@ -22,8 +22,6 @@ export const fetchTasks = createAsyncThunk(
     try {
       const res = await getTasksApi();
 
-      console.log("Task Response: ", res);
-
       return res;
     } catch (err) {
       let message = "Unexpected error occurred";
@@ -53,8 +51,6 @@ export const createTask = createAsyncThunk(
       const res = await createTaskApi(credentials);
       return res;
     } catch (err) {
-      console.log(err);
-
       let message = "Unexpected error occurred";
 
       if (err.response) {
@@ -84,8 +80,6 @@ export const updateMembersInTask = createAsyncThunk(
       const res = await updateMembersInTaskApi(id, { assignedTo });
       return res;
     } catch (err) {
-      console.log(err);
-
       let message = "Unexpected error occurred";
 
       if (err.response) {
@@ -113,7 +107,6 @@ export const filterTasks = createAsyncThunk(
   async (q, { rejectWithValue }) => {
     try {
       const res = await filterTasksApi(q.status, q.priority);
-      console.log("filter results: ", res);
 
       return res;
     } catch (err) {

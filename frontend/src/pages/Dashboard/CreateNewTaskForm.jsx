@@ -127,8 +127,6 @@ const CreateNewTaskForm = ({ toggleDrawer, open }) => {
       reset();
       setSelectedUsers([]);
     } catch (err) {
-      console.log(err);
-
       setSnackType("error");
       setSnackMessage(err);
       setOpenSnack(true);

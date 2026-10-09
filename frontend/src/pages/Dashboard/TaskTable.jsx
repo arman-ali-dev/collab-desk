@@ -38,7 +38,6 @@ const TaskTable = () => {
   const [priority, setPriority] = useState(null);
 
   useEffect(() => {
-    console.log(status, priority);
     dispatch(filterTasks({ status, priority }));
   }, [dispatch, status, priority]);
   return (

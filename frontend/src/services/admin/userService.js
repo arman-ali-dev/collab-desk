@@ -22,8 +22,6 @@ export const deleteUserApi = async (id) => {
 };
 
 export const filterUsersApi = async (status) => {
-  console.log("status: ", status);
-
   const res = await api.get("/api/admin/users/filter", {
     params: { status },
   });

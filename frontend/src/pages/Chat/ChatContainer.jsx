@@ -18,7 +18,6 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 const ChatContainer = () => {
   const dispatch = useDispatch();
   const { selectedChatRoom } = useSelector((state) => state.chatRoom);
-  useStompConnection(selectedChatRoom?.id);
   useRoomSubscription(selectedChatRoom?.id);
 
   useEffect(() => {

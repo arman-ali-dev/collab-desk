@@ -55,8 +55,6 @@ export default function AddMemberForm({ open, toggleDrawer }) {
   });
 
   const onSubmit = async (data) => {
-    console.log("data ", data);
-
     try {
       await dispatch(createUser(data)).unwrap();
 
@@ -66,8 +64,6 @@ export default function AddMemberForm({ open, toggleDrawer }) {
       toggleDrawer(false)();
       reset();
     } catch (err) {
-      console.log("User creation error: ", err);
-
       setSnackType("error");
       setSnackMessage(err);
       setOpenSnack(true);

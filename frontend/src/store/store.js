@@ -19,6 +19,7 @@ import adminTaskReducer from "./admin/taskSlice";
 import memberTaskReducer from "./member/taskSlice";
 import chatRoomReducer from "./chatRoomSlice";
 import chatReducer from "./chatSlice";
+import notificationReducer from "./notificationSlice";
 
 const storage = storageModule.default;
 
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
   profile: profileReducer,
   chatRoom: chatRoomReducer,
   chat: chatReducer,
+  notification: notificationReducer,
 
   memberProjects: projectReducer,
   memberTasks: memberTaskReducer,

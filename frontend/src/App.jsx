@@ -15,8 +15,13 @@ import KanbanBoard from "./pages/Kanban/KanbanBoard";
 import Drive from "./pages/Drive/Drive";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
 import Chat from "./pages/Chat/Chat";
+import useStompConnection from "./hooks/UseStompConnection";
+import useNotifications from "./hooks/useNotifications";
 
 function App() {
+  useStompConnection();
+  useNotifications();
+
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
 

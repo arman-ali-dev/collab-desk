@@ -80,7 +80,6 @@ export const filterProjects = createAsyncThunk(
   async (q, { rejectWithValue }) => {
     try {
       const res = await filterProjectApi(q.status, q.priority);
-      console.log("filter results: ", res);
 
       return res;
     } catch (err) {
@@ -109,7 +108,6 @@ export const getProject = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const res = await getProjectApi(id);
-      console.log("Get: ", res);
 
       return res;
     } catch (err) {

@@ -24,7 +24,6 @@ export const uploadToCloudinary = async (pics) => {
     );
 
     const result = await response.json();
-    console.log(result);
 
     if (!response.ok) {
       console.error("Upload error:", result);

@@ -15,8 +15,6 @@ export const fetchProfile = createAsyncThunk(
     try {
       const res = await getProfile();
 
-      console.log("profile res", res);
-
       return res;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "failed");
@@ -29,8 +27,6 @@ export const editProfile = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const res = await editProfileApi(credentials);
-
-      console.log("edit profile res", res);
 
       return res;
     } catch (err) {

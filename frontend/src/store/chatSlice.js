@@ -12,11 +12,8 @@ export const fetchMessages = createAsyncThunk(
     try {
       const res = await getAllMessages(id);
 
-      console.log("messages ", res);
       return res;
     } catch (err) {
-      console.log(err);
-
       return rejectWithValue(err.response?.data?.message || "failed");
     }
   },
