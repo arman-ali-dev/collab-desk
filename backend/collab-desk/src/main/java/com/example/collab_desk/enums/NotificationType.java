@@ -5,5 +5,6 @@ public enum NotificationType {
     TASK_UPDATED,
     COMMENT_ADDED,
     PROJECT_ADDED,
+    NEW_MESSAGE,
     GENERAL
 }

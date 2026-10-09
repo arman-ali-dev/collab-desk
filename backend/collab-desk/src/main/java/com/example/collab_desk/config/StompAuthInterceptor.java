@@ -71,6 +71,9 @@ public class StompAuthInterceptor implements ChannelInterceptor {
         if (principal == null) throw new MessagingException("Not authenticated");
 
         String dest = acc.getDestination();
+
+        if ("/user/queue/notifications".equals(dest)) return;
+        
         Matcher m = (dest == null) ? null : ROOM_TOPIC.matcher(dest);
         if (m == null || !m.matches()) {
             throw new MessagingException("Destination not allowed");
