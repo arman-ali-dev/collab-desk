@@ -7,6 +7,8 @@ import com.example.collab_desk.enums.ProjectStatus;
 import com.example.collab_desk.enums.TaskPriority;
 import com.example.collab_desk.enums.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,4 +27,16 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByPriority(TaskPriority priority);
 
     List<Task> findAllByOrderByCreatedAtDesc();
+
+    @Query("""
+                select distinct t from Task t
+                join t.assignedTo u
+                join fetch t.project
+                where u.id = :userId
+                  and t.status <> :doneStatus
+                  and t.dueDate <= :limit
+            """)
+    List<Task> findReminderTasks(@Param("userId") Long userId,
+                                 @Param("doneStatus") TaskStatus doneStatus,
+                                 @Param("limit") LocalDate limit);
 }

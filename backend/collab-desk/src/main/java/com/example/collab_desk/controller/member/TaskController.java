@@ -1,5 +1,6 @@
 package com.example.collab_desk.controller.member;
 
+import com.example.collab_desk.dto.responseDto.ReminderResponseDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.enums.TaskStatus;
 import com.example.collab_desk.service.TaskService;
@@ -43,6 +44,12 @@ public class TaskController {
     @GetMapping("/my")
     public ResponseEntity<List<TaskResponseDto>> getMyTasksHandler() {
         List<TaskResponseDto> response = taskService.getMyTasks();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reminders/my")
+    public ResponseEntity<List<ReminderResponseDto>> getMyReminders() {
+        List<ReminderResponseDto> response = taskService.getMyReminders();
         return ResponseEntity.ok(response);
     }
 }

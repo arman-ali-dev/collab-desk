@@ -3,6 +3,7 @@ package com.example.collab_desk.service.impl;
 import com.example.collab_desk.dto.requestDto.UpdateMemberRequestDto;
 import com.example.collab_desk.dto.requestDto.CreateTaskRequestDto;
 import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
+import com.example.collab_desk.dto.responseDto.ReminderResponseDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
 import com.example.collab_desk.entity.Project;
@@ -22,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -191,6 +194,40 @@ public class TaskServiceImpl implements TaskService {
                 map(this::mapToTaskResponseDto).
                 toList();
     }
+
+    @Override
+    public List<ReminderResponseDto> getMyReminders() {
+        User user = userService.getCurrentUser();
+        LocalDate today = LocalDate.now();
+        LocalDate limit = today.plusDays(1);
+
+        return taskRepository.findReminderTasks(user.getId(), TaskStatus.DONE, limit)
+                .stream()
+                .map((t) -> toReminder(t, today))
+                .sorted(Comparator.comparing(ReminderResponseDto::getLevel)
+                        .thenComparing(ReminderResponseDto::getDueDate)).toList();
+    }
+
+    public ReminderResponseDto toReminder(Task t, LocalDate today) {
+        long days = ChronoUnit.DAYS.between(today, t.getDueDate());
+
+        ReminderLevel level = null;
+        String message = "";
+        if (days < 0) {
+            level = ReminderLevel.OVERDUE;
+            message = "Overdue by " + (-days) + (days == -1 ? " day" : " days");
+        } else if (days == 0) {
+            level = ReminderLevel.TODAY;
+            message = "Due today";
+        } else if (days == 1) {
+            level = ReminderLevel.TOMORROW;
+            message = "Due tomorrow";
+        }
+
+        return new ReminderResponseDto(t.getId(),
+                t.getTitle(), message, t.getProject().getTitle(), level, t.getDueDate());
+    }
+
 
     private TaskResponseDto mapToTaskResponseDto(Task task) {
         return new TaskResponseDto(
