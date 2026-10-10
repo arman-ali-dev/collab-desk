@@ -614,7 +614,7 @@ public class TaskServiceImplTest {
 
 
         // act
-        List<TaskResponseDto> response = taskService.getMyTaskByYearAndMonth(2026, 9);
+        List<TaskResponseDto> response = taskService.getTaskByYearAndMonth(2026, 9);
 
         // assert
         assertNotNull(response);
@@ -641,7 +641,7 @@ public class TaskServiceImplTest {
                 eq(endDate), eq(currentUser.getId()))).thenReturn(tasks);
 
         // act
-        List<TaskResponseDto> response = taskService.getMyTaskByYearAndMonth(2026, 10);
+        List<TaskResponseDto> response = taskService.getTaskByYearAndMonth(2026, 10);
 
         // assert
         assertNotNull(response);

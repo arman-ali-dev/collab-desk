@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,7 +93,10 @@ public class AdminTaskControllerTest {
                 1L, "Test title", "Test description",
                 TaskStatus.TO_DO, TaskCategory.DESIGN, TaskPriority.LOW,
                 LocalDate.now().plusDays(2), 2L,
-                List.of(new UserResponseDto(1L, "Test", "test@gmail.com"))
+                List.of(new UserResponseDto(1L, "Test",
+                        "test@gmail.com", "https://api.com/profile.png")),
+                LocalDateTime.now(),
+                "Test Project Name"
         );
 
         when(taskService.createTask(any(CreateTaskRequestDto.class))).thenReturn(response);
@@ -192,8 +196,12 @@ public class AdminTaskControllerTest {
                 1L, "New test title", "New test description",
                 TaskStatus.DONE, TaskCategory.DEVELOPMENT, TaskPriority.HIGH,
                 LocalDate.now().plusDays(3), 4L,
-                List.of(new UserResponseDto(1L, "Test", "test@gmail.com"),
-                        new UserResponseDto(2L, "Test2", "test2@gmail.com"))
+                List.of(new UserResponseDto(1L, "Test",
+                                "test@gmail.com", "https://api.com/profile.png"),
+                        new UserResponseDto(2L, "Test2",
+                                "test2@gmail.com", "https://api.com/profile.png")),
+                LocalDateTime.now(),
+                "Test project name"
         );
 
         when(taskService.updateTask(eq(taskId), any(UpdateTaskRequestDto.class))).thenReturn(response);
@@ -371,14 +379,20 @@ public class AdminTaskControllerTest {
                 1L, "Task 1", "New test description",
                 TaskStatus.DONE, TaskCategory.DEVELOPMENT, TaskPriority.HIGH,
                 LocalDate.now().plusDays(3), 4L,
-                List.of(new UserResponseDto(1L, "Test", "test@gmail.com"))
+                List.of(new UserResponseDto(1L, "Test",
+                        "test@gmail.com", "https://api.com/profile.png")),
+                LocalDateTime.now(),
+                "Test project name"
         );
 
         TaskResponseDto task2 = new TaskResponseDto(
                 2L, "Task 2", "New test description",
                 TaskStatus.DONE, TaskCategory.DEVELOPMENT, TaskPriority.HIGH,
                 LocalDate.now().plusDays(3), 4L,
-                List.of(new UserResponseDto(1L, "Test", "test@gmail.com"))
+                List.of(new UserResponseDto(1L, "Test",
+                        "test@gmail.com", "https://api.com/profile.png")),
+                LocalDateTime.now(),
+                "Test project name"
         );
         List<TaskResponseDto> tasks = new ArrayList<>(List.of(task1, task2));
 
@@ -446,7 +460,9 @@ public class AdminTaskControllerTest {
                 TaskPriority.HIGH,
                 LocalDate.now().plusDays(2),
                 4L,
-                List.of());
+                List.of(),
+                LocalDateTime.now(),
+                "Test project name");
 
         TaskResponseDto task2 = new TaskResponseDto(
                 2L,
@@ -457,7 +473,9 @@ public class AdminTaskControllerTest {
                 TaskPriority.HIGH,
                 LocalDate.now().plusDays(2),
                 4L,
-                List.of());
+                List.of(),
+                LocalDateTime.now(),
+                "Test project name");
 
         List<TaskResponseDto> tasks = new ArrayList<>(List.of(task1, task2));
 

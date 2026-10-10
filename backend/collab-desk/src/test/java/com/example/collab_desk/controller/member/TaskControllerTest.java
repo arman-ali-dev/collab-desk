@@ -16,6 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +52,9 @@ public class TaskControllerTest {
                 TaskPriority.HIGH,
                 LocalDate.now().plusDays(2),
                 4L,
-                List.of());
+                List.of(),
+                LocalDateTime.now(),
+                "Test project name");
     }
 
     // Update Task's Status Tests
@@ -177,7 +180,7 @@ public class TaskControllerTest {
 
         List<TaskResponseDto> tasks = new ArrayList<>(List.of(task1, task2));
 
-        when(taskService.getMyTaskByYearAndMonth(eq(year), eq(month))).thenReturn(tasks);
+        when(taskService.getTaskByYearAndMonth(eq(year), eq(month))).thenReturn(tasks);
 
         // act & assert
         mockMvc.perform(get("/api/tasks/calender/my")
@@ -200,7 +203,7 @@ public class TaskControllerTest {
 
         List<TaskResponseDto> tasks = new ArrayList<>(List.of());
 
-        when(taskService.getMyTaskByYearAndMonth(eq(year), eq(month))).thenReturn(tasks);
+        when(taskService.getTaskByYearAndMonth(eq(year), eq(month))).thenReturn(tasks);
 
         // act & assert
         mockMvc.perform(get("/api/tasks/calender/my")
@@ -218,7 +221,7 @@ public class TaskControllerTest {
                         .param("month", "9"))
                 .andExpect(status().isUnauthorized());
 
-        verify(taskService, never()).getMyTaskByYearAndMonth(anyInt(), anyInt());
+        verify(taskService, never()).getTaskByYearAndMonth(anyInt(), anyInt());
     }
 
 }

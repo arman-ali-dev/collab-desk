@@ -20,6 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -82,13 +83,14 @@ public class AdminProjectControllerTest {
         // arrange
         CreateProjectRequest request = buildCreateRequest(List.of(1L));
 
-        UserResponseDto member = new UserResponseDto(1L, "Test User", "test@gmail.com");
+        UserResponseDto member = new UserResponseDto(1L, "Test User",
+                "test@gmail.com", "https://api.com/profile.png");
 
         ProjectResponseDto response = new ProjectResponseDto(
                 1L, "Test Project", "Test Description",
                 ProjectPriority.HIGH, ProjectStatus.ACTIVE, 67.77,
                 "http://localhost:8080/logo.png", "Test organization name",
-                "https://api.test.com",
+                "https://api.test.com", LocalDateTime.now(),
                 List.of(member));
 
         when(projectService.createProject(any(CreateProjectRequest.class))).thenReturn(response);
@@ -108,6 +110,7 @@ public class AdminProjectControllerTest {
                 .andExpect(jsonPath("$.logo").value("http://localhost:8080/logo.png"))
                 .andExpect(jsonPath("$.organizationName").value("Test organization name"))
                 .andExpect(jsonPath("$.url").value("https://api.test.com"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.members[0].id").value(1L));
 
     }
@@ -250,7 +253,9 @@ public class AdminProjectControllerTest {
                 ProjectPriority.HIGH, ProjectStatus.COMPLETED, 99.99,
                 "http://localhost:8080/new-logo.png",
                 "New Test Organization Name", "https://new-api-test.com",
-                List.of(new UserResponseDto(1L, "Test", "test@gmial.com")));
+                LocalDateTime.now().minusDays(5),
+                List.of(new UserResponseDto(1L, "Test",
+                        "test@gmial.com", "https://api.com/profile.png")));
 
         when(projectService.updateProject(eq(projectId), any(UpdateProjectRequest.class)))
                 .thenReturn(response);
@@ -270,6 +275,7 @@ public class AdminProjectControllerTest {
                 .andExpect(jsonPath("$.logo").value("http://localhost:8080/new-logo.png"))
                 .andExpect(jsonPath("$.organizationName").value("New Test Organization Name"))
                 .andExpect(jsonPath("$.url").value("https://new-api-test.com"))
+                .andExpect(jsonPath("$.url").isNotEmpty())
                 .andExpect(jsonPath("$.members[0].id").value(1));
 
     }
@@ -361,6 +367,4 @@ public class AdminProjectControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
-
-
 }
