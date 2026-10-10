@@ -10,19 +10,19 @@ import { useForm } from "react-hook-form";
 import { signinSchema } from "../../validations/authSchema";
 import { useState } from "react";
 import { CircularProgress } from "@mui/material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../store/authSlice";
 
 const Signin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
+  const { profile } = useSelector((state) => state.profile);
 
   const {
     register,
     handleSubmit,
     setError,
-    reset,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(signinSchema),
@@ -36,7 +36,7 @@ const Signin = () => {
   const onSubmit = async (data) => {
     try {
       await dispatch(login(data)).unwrap();
-      navigate("/dashboard");
+      navigate("/projects");
     } catch (err) {
       setError("root", { message: err });
     }

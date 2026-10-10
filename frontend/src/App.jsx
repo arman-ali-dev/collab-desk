@@ -20,6 +20,7 @@ import useNotifications from "./hooks/useNotifications";
 import { fetchReminders } from "./store/member/taskSlice";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import NotFound from "./pages/404/NotFound";
 
 function App() {
   useStompConnection();
@@ -39,7 +40,24 @@ function App() {
   const isAuthPage =
     location.pathname === "/signin" || location.pathname === "/set-password";
 
-  const hideLayout = isAuthPage;
+  const validPaths = [
+    "/dashboard",
+    "/projects",
+    "/my-tasks",
+    "/calendar",
+    "/chat",
+    "/drive",
+    "/users",
+    "/profile",
+  ];
+
+  const isNotFoundPage =
+    !validPaths.includes(location.pathname) &&
+    !location.pathname.startsWith("/projects/") &&
+    location.pathname !== "/signin" &&
+    !location.pathname.startsWith("/set-password");
+
+  const hideLayout = isAuthPage || isNotFoundPage;
 
   return (
     <>
@@ -130,6 +148,7 @@ function App() {
               />
               <Route path="/set-password" element={<PasswordSetup />} />
               <Route element={<Signin />} path="/signin" />
+              <Route element={<NotFound />} path="*" />
             </Routes>
           </div>
         </div>
