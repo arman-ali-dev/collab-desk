@@ -37,7 +37,7 @@ public class TaskController {
     public ResponseEntity<List<TaskResponseDto>> getMyTasksByYearAndMonthHandler(
             @RequestParam int year, @RequestParam int month
     ) {
-        List<TaskResponseDto> response = taskService.getMyTaskByYearAndMonth(year, month);
+        List<TaskResponseDto> response = taskService.getTaskByYearAndMonth(year, month);
         return ResponseEntity.ok(response);
     }
 

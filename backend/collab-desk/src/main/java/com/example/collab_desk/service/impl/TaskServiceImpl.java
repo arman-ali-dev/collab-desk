@@ -146,20 +146,15 @@ public class TaskServiceImpl implements TaskService {
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
 
-        return taskRepository.findByDueDateBetween(startDate, endDate)
-                .stream().map(this::mapToTaskResponseDto).toList();
-    }
-
-    @Override
-    public List<TaskResponseDto> getMyTaskByYearAndMonth(int year, int month) {
-        YearMonth yearMonth = YearMonth.of(year, month);
-
-        LocalDate startDate = yearMonth.atDay(1);
-        LocalDate endDate = yearMonth.atEndOfMonth();
-
         User currentUser = userService.getCurrentUser();
-        return taskRepository.findByDueDateBetweenAndAssignedTo_Id(startDate, endDate, currentUser.getId())
-                .stream().map(this::mapToTaskResponseDto).toList();
+
+        if (currentUser.getRole().equals(UserRole.ADMIN)) {
+            return taskRepository.findByDueDateBetween(startDate, endDate)
+                    .stream().map(this::mapToTaskResponseDto).toList();
+        } else {
+            return taskRepository.findByDueDateBetweenAndAssignedTo_Id(startDate, endDate, currentUser.getId())
+                    .stream().map(this::mapToTaskResponseDto).toList();
+        }
     }
 
     @Override

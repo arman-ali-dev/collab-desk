@@ -30,8 +30,6 @@ public interface TaskService {
 
     List<TaskResponseDto> getTaskByYearAndMonth(int year, int month);
 
-    List<TaskResponseDto> getMyTaskByYearAndMonth(int year, int month);
-
     List<TaskResponseDto> getMyTasks();
 
     TaskResponseDto updateMembers(Long taskId, UpdateMemberRequestDto request);

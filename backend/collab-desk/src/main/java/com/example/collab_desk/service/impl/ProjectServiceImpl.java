@@ -12,6 +12,7 @@ import com.example.collab_desk.enums.ProjectPriority;
 import com.example.collab_desk.enums.ProjectStatus;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.repository.ChatRoomRepository;
+import com.example.collab_desk.repository.MessageRepository;
 import com.example.collab_desk.repository.ProjectRepository;
 import com.example.collab_desk.service.ChatRoomService;
 import com.example.collab_desk.service.NotificationService;
@@ -32,6 +33,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final UserService userService;
     private final ChatRoomService chatRoomService;
     private final NotificationService notificationService;
+    private final MessageRepository messageRepository;
 
     @Override
     @Transactional
@@ -98,6 +100,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public void deleteProject(Long id) {
         Project project = this.getProjectById(id);
+        chatRoomService.deleteChatRoom(project.getId());
         projectRepository.delete(project);
     }
 

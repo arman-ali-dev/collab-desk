@@ -11,7 +11,8 @@ const Notifications = ({ notificationRef, showNotifications }) => {
   const dispatch = useDispatch();
   const { notifications, loading } = useSelector((state) => state.notification);
 
-  const handleClearMessages = () => {
+  const handleClearMessages = (e) => {
+    e.stopPropagation();
     dispatch(markAllNotificationsRead());
     dispatch(clearNotifications());
   };
@@ -82,7 +83,7 @@ const Notifications = ({ notificationRef, showNotifications }) => {
               ))}
             </div>
 
-            <div className="absolute bottom-0 w-full">
+            <div className="notification-trigger absolute bottom-0 w-full">
               <Button
                 onClick={handleClearMessages}
                 sx={{

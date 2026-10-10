@@ -18,6 +18,8 @@ import Chat from "./pages/Chat/Chat";
 import useStompConnection from "./hooks/UseStompConnection";
 import useNotifications from "./hooks/useNotifications";
 import { fetchReminders } from "./store/member/taskSlice";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 function App() {
   useStompConnection();
@@ -50,17 +52,81 @@ function App() {
 
           <div className="flex-1 overflow-y-auto">
             <Routes>
-              <Route element={<Dashboard />} path="/dashboard" />
-              <Route element={<Projects />} path="/projects" />
-              <Route element={<Calendar />} path="/calendar" />
-              <Route element={<Users />} path="/users" />
-              <Route element={<MyTasks />} path="/my-tasks" />
-              <Route element={<Profile />} path="/profile" />
-              <Route element={<Drive />} path="/drive" />
-              <Route element={<Chat />} path="/chat" />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <AdminProtectedRoute>
+                      <Dashboard />
+                    </AdminProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/dashboard"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <Projects />
+                  </ProtectedRoute>
+                }
+                path="/projects"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <Calendar />
+                  </ProtectedRoute>
+                }
+                path="/calendar"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <AdminProtectedRoute>
+                      <Users />
+                    </AdminProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/users"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <MyTasks />
+                  </ProtectedRoute>
+                }
+                path="/my-tasks"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+                path="/profile"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <Drive />
+                  </ProtectedRoute>
+                }
+                path="/drive"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <Chat />
+                  </ProtectedRoute>
+                }
+                path="/chat"
+              />
               <Route
                 path="/projects/:projectId/kanban"
-                element={<KanbanBoard />}
+                element={
+                  <ProtectedRoute>
+                    <KanbanBoard />
+                  </ProtectedRoute>
+                }
               />
               <Route path="/set-password" element={<PasswordSetup />} />
               <Route element={<Signin />} path="/signin" />

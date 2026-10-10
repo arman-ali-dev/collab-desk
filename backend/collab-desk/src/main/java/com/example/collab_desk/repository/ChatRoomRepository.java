@@ -10,4 +10,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     Optional<ChatRoom> findByProjectId(Long projectId);
 
     List<ChatRoom> findAllByOrderByCreatedAtDesc();
+
+    Optional<ChatRoom> findByProject_Id(Long projectId);
 }

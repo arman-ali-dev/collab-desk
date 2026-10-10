@@ -14,10 +14,6 @@ import { fetchChatRooms, selectChatRoom } from "../../store/chatRoomSlice";
 const LeftSidebar = () => {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(fetchChatRooms());
-  }, [dispatch]);
-
   const { chatRooms, selectedChatRoom } = useSelector(
     (state) => state.chatRoom,
   );

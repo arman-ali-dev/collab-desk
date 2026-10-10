@@ -2,6 +2,7 @@ package com.example.collab_desk.entity;
 
 import com.example.collab_desk.enums.ProjectPriority;
 import com.example.collab_desk.enums.ProjectStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -45,7 +46,8 @@ public class Project {
     @DecimalMax("100.0")
     private Double progress = 0.0;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Task> tasks = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

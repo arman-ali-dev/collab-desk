@@ -87,6 +87,8 @@ export const deleteProject = createAsyncThunk(
 
       return id;
     } catch (err) {
+      console.warn(err);
+
       let message = "Unexpected error occurred";
 
       if (err.response) {

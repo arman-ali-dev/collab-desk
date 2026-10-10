@@ -111,23 +111,25 @@ const KanbanCard = ({ task, idx }) => {
                 </div>
 
                 <div className="flex">
-                  <IconButton
-                    onClick={() => setAddMemberOpen(true)}
-                    sx={{
-                      width: 33,
-                      height: 33,
-                      backgroundColor: "#EFEFEF",
-                      cursor: "pointer",
-                      borderRadius: "50px",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginRight: "10px",
-                      "&:hover": { backgroundColor: "#EFEFEF" },
-                    }}
-                  >
-                    <img className="w-3" src={plusIcon} alt="" />
-                  </IconButton>
+                  {profile?.role == "ADMIN" && (
+                    <IconButton
+                      onClick={() => setAddMemberOpen(true)}
+                      sx={{
+                        width: 33,
+                        height: 33,
+                        backgroundColor: "#EFEFEF",
+                        cursor: "pointer",
+                        borderRadius: "50px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginRight: "10px",
+                        "&:hover": { backgroundColor: "#EFEFEF" },
+                      }}
+                    >
+                      <img className="w-3" src={plusIcon} alt="" />
+                    </IconButton>
+                  )}
 
                   {task.assignedTo.map((m, idx) => (
                     <Tooltip key={m.id} title={m.fullName}>
@@ -136,7 +138,6 @@ const KanbanCard = ({ task, idx }) => {
                         className={`min-w-8 min-h-8 w-8 h-8 rounded-full object-cover flex items-center justify-center text-white text-[13px] font-semibold ${idx !== task.assignedTo?.length - 1 ? "-mr-3 z-50 border-white border" : ""}`}
                         style={{
                           backgroundColor: "#9c9b9b",
-                          // transition: `transform 0.2s ease ${idx * 35}ms`,
                         }}
                       >
                         <img

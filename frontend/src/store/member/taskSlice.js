@@ -60,6 +60,8 @@ export const updateTaskStatus = createAsyncThunk(
 
       return res;
     } catch (err) {
+      console.log(err);
+
       let message = "Unexpected error occurred";
 
       if (err.response) {

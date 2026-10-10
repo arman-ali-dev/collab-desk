@@ -9,4 +9,6 @@ public interface ChatRoomService {
     ChatRoom createRoom(Project project);
 
     List<ChatRoom> getAllChatRoom();
+
+    void deleteChatRoom(Long projectId);
 }

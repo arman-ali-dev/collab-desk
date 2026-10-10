@@ -51,7 +51,8 @@ const ProjectCard = ({ project }) => {
   const [snackMessage, setSnackMessage] = useState("");
   const [snackType, setSnackType] = useState("success");
 
-  const handleDelete = async () => {
+  const handleDelete = async (e) => {
+    e.stopPropagation();
     try {
       await dispatch(deleteProject(project.id)).unwrap();
 
@@ -84,7 +85,10 @@ const ProjectCard = ({ project }) => {
             }}
           >
             <IconButton
-              onClick={toggleDrawer(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleDrawer(true)();
+              }}
               size="small"
               sx={{
                 transition:
@@ -99,7 +103,7 @@ const ProjectCard = ({ project }) => {
             </IconButton>
 
             <IconButton
-              disabled={deleteProjectId == project.id}
+              disabled={deleteProjectId === project.id}
               onClick={handleDelete}
               size="small"
               sx={{

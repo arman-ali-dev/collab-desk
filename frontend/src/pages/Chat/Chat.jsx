@@ -4,7 +4,10 @@ import ChatContainer from "./ChatContainer";
 import RightSidebar from "./RightSidebar";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { clearSelectedChatRoom } from "../../store/chatRoomSlice";
+import {
+  clearSelectedChatRoom,
+  fetchChatRooms,
+} from "../../store/chatRoomSlice";
 
 const EmptyState = () => (
   <div className="h-full flex flex-col items-center justify-center text-center px-6">
@@ -23,6 +26,8 @@ const Chat = () => {
   const { selectedChatRoom } = useSelector((state) => state.chatRoom);
 
   useEffect(() => {
+    dispatch(fetchChatRooms());
+
     return () => dispatch(clearSelectedChatRoom());
   }, [dispatch]);
 

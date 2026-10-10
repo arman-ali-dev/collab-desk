@@ -35,11 +35,14 @@ const Navbar = () => {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
-        (notificationRef.current &&
-          !notificationRef.current.contains(e.target)) ||
-        (remindersRef.current && !remindersRef.current.contains(e.target))
+        notificationRef.current &&
+        !notificationRef.current.contains(e.target) &&
+        !e.target.closest(".notification-trigger")
       ) {
         setShowNotifications(false);
+      }
+
+      if (remindersRef.current && !remindersRef.current.contains(e.target)) {
         setShowReminders(false);
       }
     };
@@ -141,8 +144,25 @@ const Navbar = () => {
               />
             </div>
 
-            <Tooltip onClick={toggleDrawer(true)} title="Create Task">
-              <div className="w-9 h-9 rounded-lg flex justify-center items-center nav-icon-btn bg-[#EFEFEF] cursor-pointer">
+            <Tooltip
+              onClick={(e) => {
+                if (profile?.role === "MEMBER") return;
+                e.stopPropagation();
+                toggleDrawer(true)(e);
+              }}
+              title={
+                profile?.role === "MEMBER"
+                  ? "Only Admin can create tasks"
+                  : "Create Task"
+              }
+            >
+              <div
+                className={`w-9 h-9 rounded-lg flex justify-center items-center ${
+                  profile?.role === "MEMBER"
+                    ? "bg-[#EFEFEF] opacity-50 cursor-not-allowed"
+                    : "nav-icon-btn bg-[#EFEFEF] cursor-pointer"
+                }`}
+              >
                 <img className="w-3.5" src={plusIcon} alt="" />
               </div>
             </Tooltip>
