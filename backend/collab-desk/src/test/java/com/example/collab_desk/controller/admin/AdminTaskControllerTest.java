@@ -115,7 +115,9 @@ public class AdminTaskControllerTest {
                 .andExpect(jsonPath("$.priority").value("LOW"))
                 .andExpect(jsonPath("$.dueDate").value(LocalDate.now().plusDays(2).toString()))
                 .andExpect(jsonPath("$.estimatedTime").value(2))
-                .andExpect(jsonPath("$.assignedTo[0].id").value(1));
+                .andExpect(jsonPath("$.assignedTo[0].id").value(1))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty())
+                .andExpect(jsonPath("$.projectName").value("Test Project Name"));
     }
 
     @Test
@@ -221,7 +223,9 @@ public class AdminTaskControllerTest {
                 .andExpect(jsonPath("$.dueDate").value(LocalDate.now().plusDays(3).toString()))
                 .andExpect(jsonPath("$.estimatedTime").value(4))
                 .andExpect(jsonPath("$.assignedTo[0].id").value(1))
-                .andExpect(jsonPath("$.assignedTo[1].id").value(2));
+                .andExpect(jsonPath("$.assignedTo[1].id").value(2))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty())
+                .andExpect(jsonPath("$.projectName").value("Test project name"));
     }
 
     @Test

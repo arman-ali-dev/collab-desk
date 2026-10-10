@@ -6,6 +6,7 @@ import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
 import com.example.collab_desk.dto.responseDto.ProjectResponseDto;
 import com.example.collab_desk.entity.Project;
 import com.example.collab_desk.entity.User;
+import com.example.collab_desk.enums.NotificationType;
 import com.example.collab_desk.enums.ProjectPriority;
 import com.example.collab_desk.enums.ProjectStatus;
 import com.example.collab_desk.exception.ResourceNotFoundException;
@@ -34,6 +35,12 @@ public class ProjectServiceImplTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private ChatRoomService chatRoomService;
+
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private ProjectServiceImpl projectService;
 
@@ -45,7 +52,7 @@ public class ProjectServiceImplTest {
         request.setStatus(ProjectStatus.ACTIVE);
         request.setProgress(67.77);
         request.setMembers(memberIds);
-        request.setLogo("http://localhost:8080/logo.png");
+        request.setLogo("https://localhost:8080/logo.png");
         request.setOrganizationName("Test organization name");
         request.setUrl("https://api.test.com");
         return request;
@@ -87,11 +94,18 @@ public class ProjectServiceImplTest {
         assertEquals(ProjectPriority.HIGH, saved.getPriority());
         assertEquals(ProjectStatus.ACTIVE, saved.getStatus());
         assertEquals(67.77, saved.getProgress());
-        assertEquals("http://localhost:8080/logo.png", saved.getLogo());
+        assertEquals("https://localhost:8080/logo.png", saved.getLogo());
         assertEquals("Test organization name", saved.getOrganizationName());
-        assertEquals("http://api.test.com", saved.getUrl());
+        assertEquals("https://api.test.com", saved.getUrl());
         assertSame(currentUser, saved.getCreatedBy());
         assertTrue(saved.getMembers().contains(member));
+
+        verify(chatRoomService).createRoom(saved);
+        verify(notificationService).notify(
+                eq(member),
+                eq(NotificationType.PROJECT),
+                eq("Added to project: Test Project"),
+                eq("You have been added as a member of the project Test Project."));
     }
 
     @Test
@@ -110,6 +124,9 @@ public class ProjectServiceImplTest {
         );
 
         verify(projectRepository, never()).save(any(Project.class));
+        verify(chatRoomService, never()).createRoom(any(Project.class));
+        verify(notificationService, never()).notify(any(User.class),
+                any(NotificationType.class), anyString(), anyString());
     }
 
     @Test
@@ -128,6 +145,9 @@ public class ProjectServiceImplTest {
 
         verify(userService, never()).getUsersById(anyList());
         verify(projectRepository, never()).save(any(Project.class));
+        verify(chatRoomService, never()).createRoom(any(Project.class));
+        verify(notificationService, never()).notify(any(User.class),
+                any(NotificationType.class), anyString(), anyString());
     }
 
     @Test
@@ -148,6 +168,10 @@ public class ProjectServiceImplTest {
                 RuntimeException.class,
                 () -> projectService.createProject(request)
         );
+
+        verify(chatRoomService, never()).createRoom(any(Project.class));
+        verify(notificationService, never()).notify(any(User.class),
+                any(NotificationType.class), anyString(), anyString());
     }
 
     // Update Project Tests
@@ -322,7 +346,7 @@ public class ProjectServiceImplTest {
 
         List<Project> projects = new ArrayList<>(List.of(project1, project2));
 
-        when(projectRepository.findAll()).thenReturn(projects);
+        when(projectRepository.findAllByOrderByCreatedAtDesc()).thenReturn(projects);
 
         // act
         List<ProjectResponseDto> response = projectService.getAllProjects();
@@ -338,7 +362,7 @@ public class ProjectServiceImplTest {
     public void getAllProjects_shouldReturnEmptyProjectList() {
         // arrange
         List<Project> projects = new ArrayList<>();
-        when(projectRepository.findAll()).thenReturn(projects);
+        when(projectRepository.findAllByOrderByCreatedAtDesc()).thenReturn(projects);
 
         // act
         List<ProjectResponseDto> response = projectService.getAllProjects();
