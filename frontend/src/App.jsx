@@ -17,6 +17,7 @@ import PasswordSetup from "./pages/Auth/PasswordSetup";
 import Chat from "./pages/Chat/Chat";
 import useStompConnection from "./hooks/UseStompConnection";
 import useNotifications from "./hooks/useNotifications";
+import { fetchReminders } from "./store/member/taskSlice";
 
 function App() {
   useStompConnection();
@@ -28,6 +29,7 @@ function App() {
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchProfile());
+      dispatch(fetchReminders());
     }
   }, [isAuthenticated, dispatch]);
 

@@ -1,6 +1,6 @@
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress, Tooltip } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearNotifications,
@@ -51,13 +51,18 @@ const Notifications = ({ notificationRef, showNotifications }) => {
                   </div>
 
                   <div className="flex-1 min-w-0 pr-12">
-                    <p className="text-[#111827] font-semibold text-[13px] truncate">
-                      {n.title}
-                    </p>
+                    <Tooltip title={n.titl}>
+                      <p className="text-[#111827] font-semibold text-[13px] truncate">
+                        {n.title}
+                      </p>
+                    </Tooltip>
 
-                    <p className="text-[#6B7280] text-[12px] leading-relaxed mt-0.5">
-                      {n.message}
-                    </p>
+                    <Tooltip title={n.message}>
+                      <p className="text-[#6B7280]  text-[12px] leading-relaxed mt-0.5">
+                        {n.message.split(" ").slice(0, 7).join(" ")}
+                        {n.message.split(" ").length > 7 && "..."}
+                      </p>
+                    </Tooltip>
 
                     <p className="text-[#9CA3AF] text-[11px] mt-1">
                       {n.createdAt
@@ -70,10 +75,8 @@ const Notifications = ({ notificationRef, showNotifications }) => {
                   </div>
 
                   <p className="inline-block text-[10px] px-2 py-0.5 rounded-full absolute top-2 right-2 font-medium bg-[#111827] text-white">
-                    {n.type == "NEW_MESSAGE"
-                      ? "Message"
-                      : n.type.charAt(0).toUpperCase() +
-                        n.type.slice(1).toLowerCase()}
+                    {n.type.charAt(0).toUpperCase() +
+                      n.type.slice(1).toLowerCase()}
                   </p>
                 </div>
               ))}

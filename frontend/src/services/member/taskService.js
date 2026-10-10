@@ -24,3 +24,8 @@ export const getMyTasksByProjectApi = async (projectId) => {
   const response = await api.get(`/api/tasks/project/${projectId}`);
   return response.data;
 };
+
+export const getMyRemindersApi = async () => {
+  const response = await api.get(`/api/tasks/reminders/my`);
+  return response.data;
+};

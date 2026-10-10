@@ -10,6 +10,7 @@ import CreateNewTaskForm from "../pages/Dashboard/CreateNewTaskForm";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Notifications from "./Notifications";
+import Reminders from "./Reminders";
 
 const Navbar = () => {
   const { profile } = useSelector((state) => state.profile);
@@ -26,13 +27,20 @@ const Navbar = () => {
   const notificationRef = useRef(null);
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // Reminders
+  const { reminders } = useSelector((state) => state.memberTasks);
+  const remindersRef = useRef(null);
+  const [showReminders, setShowReminders] = useState(false);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
-        notificationRef.current &&
-        !notificationRef.current.contains(e.target)
+        (notificationRef.current &&
+          !notificationRef.current.contains(e.target)) ||
+        (remindersRef.current && !remindersRef.current.contains(e.target))
       ) {
         setShowNotifications(false);
+        setShowReminders(false);
       }
     };
 
@@ -42,6 +50,7 @@ const Navbar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   return (
     <>
       <div
@@ -77,21 +86,31 @@ const Navbar = () => {
 
         <div className="flex items-center gap-7">
           <div className="flex gap-2">
-            <Tooltip title="Reminder">
-              <div className="nav-icon-btn w-9 h-9 relative cursor-pointer bg-[#EFEFEF] rounded-lg flex justify-center items-center">
-                <img
-                  className="w-4.5"
-                  src={chronometerIcon}
-                  alt=""
-                  style={{
-                    transition: "transform 0.2s ease",
-                  }}
-                />
-                <span className="badge-dot bg-[#FA2626] absolute -top-0.5 -right-1 opacity-80 flex justify-center items-center text-[9px] text-white h-3.5 w-3.5 rounded-full">
-                  1
-                </span>
-              </div>
-            </Tooltip>
+            <div className="relative">
+              <Tooltip onClick={() => setShowReminders(true)} title="Reminder">
+                <div className="nav-icon-btn w-9 h-9 relative cursor-pointer bg-[#EFEFEF] rounded-lg flex justify-center items-center">
+                  <img
+                    className="w-4.5"
+                    src={chronometerIcon}
+                    alt=""
+                    style={{
+                      transition: "transform 0.2s ease",
+                    }}
+                  />
+
+                  {reminders?.length > 0 && (
+                    <span className="badge-dot bg-[#FA2626] absolute -top-0.5 -right-1 opacity-80 flex justify-center items-center text-[9px] text-white h-3.5 w-3.5 rounded-full">
+                      {Reminders.length}
+                    </span>
+                  )}
+                </div>
+              </Tooltip>
+
+              <Reminders
+                showReminders={showReminders}
+                remindersRef={remindersRef}
+              />
+            </div>
 
             <div className="relative">
               <Tooltip
