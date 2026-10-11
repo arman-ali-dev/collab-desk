@@ -3,7 +3,7 @@ package com.example.collab_desk.service;
 import com.example.collab_desk.dto.requestDto.CreateTaskRequestDto;
 import com.example.collab_desk.dto.requestDto.UpdateMemberRequestDto;
 import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
-import com.example.collab_desk.dto.responseDto.ProjectResponseDto;
+import com.example.collab_desk.dto.responseDto.ReminderResponseDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.entity.Project;
 import com.example.collab_desk.entity.Task;
@@ -19,12 +19,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
-import java.time.Year;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -813,7 +809,7 @@ public class TaskServiceImplTest {
         Task task2 = buildExistingTask(userWithId(1L));
         task2.setId(2L);
         task2.setStatus(TaskStatus.DONE);
-        List<Task> tasks = new ArrayList<>(List.of(task1,task2));
+        List<Task> tasks = new ArrayList<>(List.of(task1, task2));
 
         when(taskRepository.findByStatus(TaskStatus.valueOf(status))).thenReturn(tasks);
 
@@ -922,8 +918,63 @@ public class TaskServiceImplTest {
         verify(taskRepository, never()).findByStatus(any(TaskStatus.class));
         verify(taskRepository, never()).findByPriority(any(TaskPriority.class));
     }
-    
 
+    // Get my reminders tests
+
+    @Test
+    public void getMyReminders_shouldReturnRemindersSuccessfully() {
+        // arrange
+        User currentUser = userWithId(1L);
+        LocalDate today = LocalDate.now();
+        LocalDate limit = today.plusDays(1);
+
+        Task task1 = buildExistingTask(userWithId(1L));
+        task1.setId(1L);
+        Task task2 = buildExistingTask(userWithId(1L));
+        task2.setId(2L);
+
+        List<Task> tasks = new ArrayList<>(List.of(task1, task2));
+
+        when(userService.getCurrentUser()).thenReturn(currentUser);
+        when(taskRepository.findReminderTasks(currentUser.getId(), TaskStatus.DONE, limit)).thenReturn(tasks);
+
+        // act
+        List<ReminderResponseDto> response = taskService.getMyReminders();
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+    }
+
+    @Test
+    public void getMyReminders_shouldReturnReminderEmptyListSuccessfully() {
+        // arrange
+        User currentUser = userWithId(1L);
+        LocalDate today = LocalDate.now();
+        LocalDate limit = today.plusDays(1);
+
+        List<Task> tasks = new ArrayList<>(List.of());
+
+        when(userService.getCurrentUser()).thenReturn(currentUser);
+        when(taskRepository.findReminderTasks(currentUser.getId(), TaskStatus.DONE, limit)).thenReturn(tasks);
+
+        // act
+        List<ReminderResponseDto> response = taskService.getMyReminders();
+
+        // assert
+        assertNotNull(response);
+        assertEquals(0, response.size());
+    }
+
+    @Test
+    public void getMyReminders_shouldThrowExceptionWhenUserIsNotAuthenticated() {
+        when(userService.getCurrentUser()).thenThrow(new UnauthorizedException("User is not authenticated"));
+
+        // act & assert
+        assertThrows(UnauthorizedException.class, () -> taskService.getMyReminders());
+
+        verify(taskRepository, never()).findReminderTasks(anyLong(), any(TaskStatus.class), any());
+    }
 
 
 }

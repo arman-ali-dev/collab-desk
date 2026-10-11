@@ -1,8 +1,10 @@
 package com.example.collab_desk.controller.member;
 
+import com.example.collab_desk.dto.responseDto.ReminderResponseDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.entity.Project;
 import com.example.collab_desk.entity.Task;
+import com.example.collab_desk.enums.ReminderLevel;
 import com.example.collab_desk.enums.TaskCategory;
 import com.example.collab_desk.enums.TaskPriority;
 import com.example.collab_desk.enums.TaskStatus;
@@ -222,6 +224,57 @@ public class TaskControllerTest {
                 .andExpect(status().isUnauthorized());
 
         verify(taskService, never()).getTaskByYearAndMonth(anyInt(), anyInt());
+    }
+
+    @Test
+    @WithMockUser
+    public void getMyReminders_shouldReturn200WithReminders() throws Exception {
+        // arrange
+        ReminderResponseDto reminder1 = new ReminderResponseDto(1L, "Reminder 1",
+                "Reminder test message", "Test project",
+                ReminderLevel.OVERDUE, LocalDate.now().minusDays(1));
+
+        ReminderResponseDto reminder2 = new ReminderResponseDto(2L, "Reminder 2",
+                "Reminder test message", "Test project",
+                ReminderLevel.OVERDUE, LocalDate.now().minusDays(1));
+
+        List<ReminderResponseDto> reminders = new ArrayList<>(List.of(reminder1, reminder2));
+
+        when(taskService.getMyReminders()).thenReturn(reminders);
+
+        // act
+        mockMvc.perform(get("/api/tasks/reminders/my"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].taskId").value(1L))
+                .andExpect(jsonPath("$[1].taskId").value(2L))
+                .andExpect(jsonPath("$[0].title").value("Reminder 1"))
+                .andExpect(jsonPath("$[1].title").value("Reminder 2"))
+                .andExpect(jsonPath("$[0].level").value("OVERDUE"))
+                .andExpect(jsonPath("$[1].level").value("OVERDUE"));
+    }
+
+    @Test
+    @WithMockUser
+    public void getMyReminders_shouldReturn200WithRemindersEmptyList() throws Exception {
+        // arrange
+        List<ReminderResponseDto> reminders = new ArrayList<>(List.of());
+
+        when(taskService.getMyReminders()).thenReturn(reminders);
+
+        // act
+        mockMvc.perform(get("/api/tasks/reminders/my"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    public void getMyReminders_shouldReturn401WhenUserNotAuthenticated() throws Exception {
+        // act
+        mockMvc.perform(get("/api/tasks/reminders/my"))
+                .andExpect(status().isUnauthorized());
+
+        verify(taskService, never()).getMyReminders();
     }
 
 }
