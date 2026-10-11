@@ -205,6 +205,7 @@ public class TaskServiceImplTest {
         task.setDueDate(LocalDate.now().minusDays(2));
         task.setEstimatedTime(4L);
         task.setAssignedTo(Set.of(oldMember));
+        task.setProject(projectWithId(1L));
         return task;
     }
 
@@ -802,8 +803,127 @@ public class TaskServiceImplTest {
     // filter tasks tests
 
     @Test
-    public void filterTasks_shouldReturn200WithFilteredTasks() {
+    public void filterTasks_shouldFilterByStatusOnly() {
         // arrange
-//        String status =
+        String status = "DONE";
+
+        Task task1 = buildExistingTask(userWithId(1L));
+        task1.setId(1L);
+        task1.setStatus(TaskStatus.DONE);
+        Task task2 = buildExistingTask(userWithId(1L));
+        task2.setId(2L);
+        task2.setStatus(TaskStatus.DONE);
+        List<Task> tasks = new ArrayList<>(List.of(task1,task2));
+
+        when(taskRepository.findByStatus(TaskStatus.valueOf(status))).thenReturn(tasks);
+
+        // act
+        List<TaskResponseDto> response = taskService.filterTasks(status, null);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(1L, response.get(0).getId());
+        assertEquals(2L, response.get(1).getId());
+        assertEquals(TaskStatus.DONE, response.get(0).getStatus());
+        assertEquals(TaskStatus.DONE, response.get(1).getStatus());
+
+        verify(taskRepository, never()).findByPriority(any(TaskPriority.class));
+        verify(taskRepository, never()).findAllByOrderByCreatedAtDesc();
     }
+
+    @Test
+    public void filterTasks_shouldFilterByPriorityOnly() {
+        // arrange
+        String priority = "LOW";
+
+        Task task1 = buildExistingTask(userWithId(1L));
+        task1.setId(1L);
+        task1.setPriority(TaskPriority.LOW);
+        Task task2 = buildExistingTask(userWithId(1L));
+        task2.setId(2L);
+        task2.setPriority(TaskPriority.LOW);
+        List<Task> projects = new ArrayList<>(List.of(task1, task2));
+
+        when(taskRepository.findByPriority(TaskPriority.valueOf(priority))).thenReturn(projects);
+
+        // act
+        List<TaskResponseDto> response = taskService.filterTasks(null, priority);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(1L, response.get(0).getId());
+        assertEquals(2L, response.get(1).getId());
+        assertEquals(TaskPriority.LOW, response.get(0).getPriority());
+        assertEquals(TaskPriority.LOW, response.get(1).getPriority());
+
+        verify(taskRepository, never())
+                .findByStatus(any(TaskStatus.class));
+        verify(taskRepository, never()).findAllByOrderByCreatedAtDesc();
+    }
+
+    @Test
+    public void filterTasks_shouldReturnAllTasksWhenNothingMatches() {
+        // arrange
+        Task task1 = buildExistingTask(userWithId(1L));
+        task1.setId(1L);
+        task1.setPriority(TaskPriority.LOW);
+        task1.setStatus(TaskStatus.DONE);
+        Task task2 = buildExistingTask(userWithId(1L));
+        task2.setId(2L);
+        task2.setPriority(TaskPriority.LOW);
+        task2.setStatus(TaskStatus.DONE);
+        List<Task> tasks = new ArrayList<>(List.of(task1, task2));
+
+        when(taskRepository.findAllByOrderByCreatedAtDesc()).thenReturn(tasks);
+
+        // act
+        List<TaskResponseDto> response = taskService.filterTasks(null, null);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(1L, response.get(0).getId());
+        assertEquals(2L, response.get(1).getId());
+        assertEquals(TaskStatus.DONE, response.get(0).getStatus());
+        assertEquals(TaskStatus.DONE, response.get(1).getStatus());
+        assertEquals(TaskPriority.LOW, response.get(0).getPriority());
+        assertEquals(TaskPriority.LOW, response.get(1).getPriority());
+
+        verify(taskRepository, never()).findByStatus(any(TaskStatus.class));
+        verify(taskRepository, never()).findByPriority(any(TaskPriority.class));
+    }
+
+    @Test
+    public void filterTasks_shouldThrowExceptionWhenStatusIsNotValidEnum() {
+        // arrange
+        String status = "INVALID_STATUS";
+
+        // act & assert
+        assertThrows(IllegalArgumentException.class,
+                () -> taskService.filterTasks(status, null));
+
+        verify(taskRepository, never()).findAllByOrderByCreatedAtDesc();
+        verify(taskRepository, never()).findByStatus(any(TaskStatus.class));
+        verify(taskRepository, never()).findByPriority(any(TaskPriority.class));
+    }
+
+    @Test
+    public void filterTasks_shouldThrowExceptionWhenPriorityIsNotValidEnum() {
+        // arrange
+        String status = "INVALID_PRIORITY";
+
+        // act & assert
+        assertThrows(IllegalArgumentException.class,
+                () -> taskService.filterTasks(status, null));
+
+        verify(taskRepository, never()).findAllByOrderByCreatedAtDesc();
+        verify(taskRepository, never()).findByStatus(any(TaskStatus.class));
+        verify(taskRepository, never()).findByPriority(any(TaskPriority.class));
+    }
+    
+
+
+
 }

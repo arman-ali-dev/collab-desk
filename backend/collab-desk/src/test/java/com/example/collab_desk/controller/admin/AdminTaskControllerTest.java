@@ -2,15 +2,15 @@ package com.example.collab_desk.controller.admin;
 
 import com.example.collab_desk.config.SecurityConfig;
 import com.example.collab_desk.dto.requestDto.*;
+import com.example.collab_desk.dto.responseDto.ProjectResponseDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
-import com.example.collab_desk.enums.TaskCategory;
-import com.example.collab_desk.enums.TaskPriority;
-import com.example.collab_desk.enums.TaskStatus;
+import com.example.collab_desk.enums.*;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.exception.UnauthorizedException;
 import com.example.collab_desk.service.TaskService;
 import com.example.collab_desk.service.impl.CustomUserDetailsService;
+import lombok.With;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -50,6 +50,20 @@ public class AdminTaskControllerTest {
     @MockitoBean
     private CustomUserDetailsService customUserDetailsService;
 
+
+    private TaskResponseDto buildTaskResponse(Long id) {
+        return new TaskResponseDto(
+                id, "Test title", "Test description",
+                TaskStatus.TO_DO, TaskCategory.DESIGN, TaskPriority.LOW,
+                LocalDate.now().plusDays(2), 2L,
+                List.of(new UserResponseDto(1L, "Test",
+                        "test@gmail.com", "https://api.com/profile.png")),
+                LocalDateTime.now(),
+                "Test Project Name"
+        );
+
+    }
+
     public CreateTaskRequestDto buildCreateRequest(List<Long> members) {
         CreateTaskRequestDto request = new CreateTaskRequestDto();
         request.setTitle("Test title");
@@ -86,16 +100,7 @@ public class AdminTaskControllerTest {
     public void createTask_shouldReturn201WhenRequestIsValid() throws Exception {
         // arrange
         CreateTaskRequestDto request = buildCreateRequest(List.of(1L));
-        TaskResponseDto response = new TaskResponseDto(
-                1L, "Test title", "Test description",
-                TaskStatus.TO_DO, TaskCategory.DESIGN, TaskPriority.LOW,
-                LocalDate.now().plusDays(2), 2L,
-                List.of(new UserResponseDto(1L, "Test",
-                        "test@gmail.com", "https://api.com/profile.png")),
-                LocalDateTime.now(),
-                "Test Project Name"
-        );
-
+        TaskResponseDto response = buildTaskResponse(1L);
         when(taskService.createTask(any(CreateTaskRequestDto.class))).thenReturn(response);
 
         // act & assert
@@ -656,5 +661,154 @@ public class AdminTaskControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(taskService, never()).updateMembers(anyLong(), any(UpdateMemberRequestDto.class));
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void filterTasks_shouldReturn200WithFilterTasksByStatusOnly() throws Exception {
+        // arrange
+        String status = "DONE";
+
+        TaskResponseDto task1 = buildTaskResponse(1L);
+        task1.setStatus(TaskStatus.DONE);
+        TaskResponseDto task2 = buildTaskResponse(2L);
+        task2.setStatus(TaskStatus.DONE);
+        List<TaskResponseDto> tasks = new ArrayList<>(List.of(task1, task2));
+
+        when(taskService.filterTasks(status, null)).thenReturn(tasks);
+
+        // act & assert
+        mockMvc.perform(get("/api/admin/tasks/filter")
+                        .queryParam("status", "DONE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[0].status").value("DONE"))
+                .andExpect(jsonPath("$[1].status").value("DONE"));
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void filterTasks_shouldReturn200WithFilterTasksByPriorityOnly() throws Exception {
+        // arrange
+        String priority = "LOW";
+
+        TaskResponseDto task1 = buildTaskResponse(1L);
+        task1.setPriority(TaskPriority.LOW);
+        TaskResponseDto task2 = buildTaskResponse(2L);
+        task2.setPriority(TaskPriority.LOW);
+        List<TaskResponseDto> tasks = new ArrayList<>(List.of(task1, task2));
+
+        when(taskService.filterTasks(null, priority)).thenReturn(tasks);
+
+        // act & assert
+        mockMvc.perform(get("/api/admin/tasks/filter")
+                        .queryParam("priority", "LOW"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[0].priority").value("LOW"))
+                .andExpect(jsonPath("$[1].priority").value("LOW"));
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void filterTasks_shouldReturn200WithFilterTasksByNothing() throws Exception {
+        // arrange
+        TaskResponseDto task1 = buildTaskResponse(1L);
+        task1.setPriority(TaskPriority.LOW);
+        task1.setStatus(TaskStatus.DONE);
+        TaskResponseDto task2 = buildTaskResponse(2L);
+        task2.setPriority(TaskPriority.LOW);
+        task2.setStatus(TaskStatus.DONE);
+        List<TaskResponseDto> tasks = new ArrayList<>(List.of(task1, task2));
+
+        when(taskService.filterTasks(null, null)).thenReturn(tasks);
+
+        // act & assert
+        mockMvc.perform(get("/api/admin/tasks/filter"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[0].status").value("DONE"))
+                .andExpect(jsonPath("$[1].status").value("DONE"))
+                .andExpect(jsonPath("$[0].priority").value("LOW"))
+                .andExpect(jsonPath("$[1].priority").value("LOW"));
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void filterTasks_shouldReturn400WhenStatusIsNotValidEnum() throws Exception {
+        // arrange
+        String status = "INVALID_STATUS";
+
+        when(taskService.filterTasks(status, null))
+                .thenThrow(new IllegalArgumentException("Invalid type"));
+
+        // act & assert
+        mockMvc.perform(get("/api/admin/tasks/filter")
+                        .queryParam("status", "INVALID_STATUS"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void filterTasks_shouldReturn400WhenPriorityIsNotValidEnum() throws Exception {
+        // arrange
+        String priority = "INVALID_PRIORITY";
+
+        when(taskService.filterTasks(null, priority))
+                .thenThrow(new IllegalArgumentException("Invalid type"));
+
+        // act & assert
+        mockMvc.perform(get("/api/admin/tasks/filter")
+                        .queryParam("priority", "INVALID_PRIORITY"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void filterTasks_shouldReturn200WithEmptyList() throws Exception {
+        // arrange
+        String status = "DONE";
+        String priority = "HIGH";
+
+        List<TaskResponseDto> tasks = new ArrayList<>(List.of());
+
+        when(taskService.filterTasks(status, priority)).thenReturn(tasks);
+
+        // act & assert
+        mockMvc.perform(get("/api/admin/tasks/filter")
+                        .queryParam("status", "DONE")
+                        .queryParam("priority", "HIGH"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+
+    @Test
+    public void filterProjects_shouldReturn401WhenUserIsNotAuthenticated() throws Exception {
+        // act & assert
+        mockMvc.perform(get("/api/admin/tasks/filter")
+                        .queryParam("status", "DONE")
+                        .queryParam("priority", "HIGH"))
+                .andExpect(status().isUnauthorized());
+
+        verify(taskService, never()).filterTasks(anyString(), anyString());
+    }
+
+    @Test
+    @WithMockUser(authorities = "MEMBER")
+    public void filterProjects_shouldReturn403WhenUserIsNotAdmin() throws Exception {
+        // act & assert
+        mockMvc.perform(get("/api/admin/tasks/filter")
+                        .queryParam("status", "DONE")
+                        .queryParam("priority", "HIGH"))
+                .andExpect(status().isForbidden());
+
+        verify(taskService, never()).filterTasks(anyString(), anyString());
     }
 }

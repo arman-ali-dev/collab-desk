@@ -446,7 +446,7 @@ public class ProjectServiceImplTest {
         assertEquals(0, response.size());
     }
 
-    // Filter Project By Status
+    // Filter Projects
 
     @Test
     public void filterProjects_shouldFilterByStatusOnly() {
