@@ -6,6 +6,7 @@ import com.example.collab_desk.enums.ProjectPriority;
 import com.example.collab_desk.enums.ProjectStatus;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.service.ProjectService;
+import lombok.With;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -167,33 +169,140 @@ public class ProjectControllerTest {
 
     @Test
     @WithMockUser
-    public void filterProjects_shouldReturn200WithActiveProject() throws Exception {
+    public void filterProjects_shouldReturn200WithFilterProjectsByStatusOnly() throws Exception {
         // arrange
         String status = "ACTIVE";
-        String priority = "HIGH";
 
         ProjectResponseDto project1 = buildProjectResponse(1L);
         project1.setStatus(ProjectStatus.ACTIVE);
-        project1.setPriority(ProjectPriority.HIGH);
         ProjectResponseDto project2 = buildProjectResponse(2L);
         project2.setStatus(ProjectStatus.ACTIVE);
-        project2.setPriority(ProjectPriority.HIGH);
+        List<ProjectResponseDto> projects = new ArrayList<>(List.of(project1, project2));
+
+        when(projectService.filterProjects(status, null)).thenReturn(projects);
+
+        // act & assert
+        mockMvc.perform(get("/api/projects/filter")
+                        .queryParam("status", "ACTIVE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[0].status").value("ACTIVE"))
+                .andExpect(jsonPath("$[1].status").value("ACTIVE"));
+    }
+
+    @Test
+    @WithMockUser
+    public void filterProjects_shouldReturn200WithFilterProjectsByPriorityOnly() throws Exception {
+        // arrange
+        String priority = "LOW";
+
+        ProjectResponseDto project1 = buildProjectResponse(1L);
+        project1.setPriority(ProjectPriority.LOW);
+        ProjectResponseDto project2 = buildProjectResponse(2L);
+        project2.setPriority(ProjectPriority.LOW);
+        List<ProjectResponseDto> projects = new ArrayList<>(List.of(project1, project2));
+
+        when(projectService.filterProjects(null, priority)).thenReturn(projects);
+
+        // act & assert
+        mockMvc.perform(get("/api/projects/filter")
+                        .queryParam("priority", "LOW"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[0].priority").value("LOW"))
+                .andExpect(jsonPath("$[1].priority").value("LOW"));
+    }
+
+    @Test
+    @WithMockUser
+    public void filterProjects_shouldReturn200WithFilterProjectsByStatusAndPriority() throws Exception {
+        // arrange
+        String status = "ACTIVE";
+        String priority = "LOW";
+
+        ProjectResponseDto project1 = buildProjectResponse(1L);
+        project1.setPriority(ProjectPriority.LOW);
+        project1.setStatus(ProjectStatus.ACTIVE);
+        ProjectResponseDto project2 = buildProjectResponse(2L);
+        project2.setPriority(ProjectPriority.LOW);
+        project2.setStatus(ProjectStatus.ACTIVE);
         List<ProjectResponseDto> projects = new ArrayList<>(List.of(project1, project2));
 
         when(projectService.filterProjects(status, priority)).thenReturn(projects);
 
         // act & assert
         mockMvc.perform(get("/api/projects/filter")
-                        .queryParam("status", "ACTIVE")
-                        .queryParam("priority", "HIGH"))
+                        .queryParam("priority", "LOW")
+                        .queryParam("status", "ACTIVE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[1].id").value(2))
                 .andExpect(jsonPath("$[0].status").value("ACTIVE"))
                 .andExpect(jsonPath("$[1].status").value("ACTIVE"))
-                .andExpect(jsonPath("$[0].priority").value("HIGH"))
-                .andExpect(jsonPath("$[1].priority").value("HIGH"));
+                .andExpect(jsonPath("$[0].priority").value("LOW"))
+                .andExpect(jsonPath("$[1].priority").value("LOW"));
+    }
+
+    @Test
+    @WithMockUser
+    public void filterProjects_shouldReturn200WithFilterProjectsByNothing() throws Exception {
+        // arrange
+        ProjectResponseDto project1 = buildProjectResponse(1L);
+        project1.setPriority(ProjectPriority.LOW);
+        project1.setStatus(ProjectStatus.ACTIVE);
+        ProjectResponseDto project2 = buildProjectResponse(2L);
+        project2.setPriority(ProjectPriority.LOW);
+        project2.setStatus(ProjectStatus.ACTIVE);
+        List<ProjectResponseDto> projects = new ArrayList<>(List.of(project1, project2));
+
+        when(projectService.filterProjects(null, null)).thenReturn(projects);
+
+        // act & assert
+        mockMvc.perform(get("/api/projects/filter"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[0].status").value("ACTIVE"))
+                .andExpect(jsonPath("$[1].status").value("ACTIVE"))
+                .andExpect(jsonPath("$[0].priority").value("LOW"))
+                .andExpect(jsonPath("$[1].priority").value("LOW"));
+    }
+
+    @Test
+    @WithMockUser
+    public void filterProjects_shouldReturn400WhenStatusIsNotValidEnum() throws Exception {
+        // arrange
+        String status = "INVALID_STATUS";
+
+        when(projectService.filterProjects(status, null))
+                .thenThrow(new IllegalArgumentException("Invalid type"));
+
+        // act & assert
+        mockMvc.perform(get("/api/projects/filter")
+                .queryParam("status", "INVALID_STATUS"))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    @WithMockUser
+    public void filterProjects_shouldReturn400WhenPriorityIsNotValidEnum() throws Exception {
+        // arrange
+        String priority = "INVALID_PRIORITY";
+
+        when(projectService.filterProjects(null, priority))
+                .thenThrow(new IllegalArgumentException("Invalid type"));
+
+        // act & assert
+        mockMvc.perform(get("/api/projects/filter")
+                        .queryParam("priority", "INVALID_PRIORITY"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

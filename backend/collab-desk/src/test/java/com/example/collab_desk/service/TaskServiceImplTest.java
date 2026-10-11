@@ -799,4 +799,11 @@ public class TaskServiceImplTest {
         verify(taskRepository, never()).save(any(Task.class));
     }
 
+    // filter tasks tests
+
+    @Test
+    public void filterTasks_shouldReturn200WithFilteredTasks() {
+        // arrange
+//        String status =
+    }
 }

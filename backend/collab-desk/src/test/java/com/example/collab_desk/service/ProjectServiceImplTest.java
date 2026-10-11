@@ -449,7 +449,7 @@ public class ProjectServiceImplTest {
     // Filter Project By Status
 
     @Test
-    public void filterProjects_shouldReturnProjectsByStatus() {
+    public void filterProjects_shouldFilterByStatusOnly() {
         // arrange
         String status = "COMPLETED";
 
@@ -473,5 +473,145 @@ public class ProjectServiceImplTest {
         assertEquals(2L, response.get(1).getId());
         assertEquals(ProjectStatus.COMPLETED, response.get(0).getStatus());
         assertEquals(ProjectStatus.COMPLETED, response.get(1).getStatus());
+
+        verify(projectRepository, never())
+                .findByStatusAndPriority(any(ProjectStatus.class), any(ProjectPriority.class));
+        verify(projectRepository, never()).findByPriority(any(ProjectPriority.class));
+        verify(projectRepository, never()).findAllByOrderByCreatedAtDesc();
+    }
+
+    @Test
+    public void filterProjects_shouldFilterByPriorityOnly() {
+        // arrange
+        String priority = "LOW";
+
+        Project project1 = buildExistingProject(userWithId(1L));
+        project1.setId(1L);
+        project1.setPriority(ProjectPriority.LOW);
+        Project project2 = buildExistingProject(userWithId(1L));
+        project2.setId(2L);
+        project2.setPriority(ProjectPriority.LOW);
+        List<Project> projects = new ArrayList<>(List.of(project1, project2));
+
+        when(projectRepository.findByPriority(ProjectPriority.valueOf(priority))).thenReturn(projects);
+
+        // act
+        List<ProjectResponseDto> response = projectService.filterProjects(null, priority);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(1L, response.get(0).getId());
+        assertEquals(2L, response.get(1).getId());
+        assertEquals(ProjectPriority.LOW, response.get(0).getPriority());
+        assertEquals(ProjectPriority.LOW, response.get(1).getPriority());
+
+        verify(projectRepository, never())
+                .findByStatusAndPriority(any(ProjectStatus.class), any(ProjectPriority.class));
+        verify(projectRepository, never()).findByStatus(any(ProjectStatus.class));
+        verify(projectRepository, never()).findAllByOrderByCreatedAtDesc();
+    }
+
+    @Test
+    public void filterProjects_shouldFilterByStatusAndPriority() {
+        // arrange
+        String status = "COMPLETED";
+        String priority = "LOW";
+
+        Project project1 = buildExistingProject(userWithId(1L));
+        project1.setId(1L);
+        project1.setPriority(ProjectPriority.LOW);
+        project1.setStatus(ProjectStatus.COMPLETED);
+        Project project2 = buildExistingProject(userWithId(1L));
+        project2.setId(2L);
+        project2.setPriority(ProjectPriority.LOW);
+        project2.setStatus(ProjectStatus.COMPLETED);
+        List<Project> projects = new ArrayList<>(List.of(project1, project2));
+
+        when(projectRepository.findByStatusAndPriority(ProjectStatus.valueOf(status),
+                ProjectPriority.valueOf(priority))).thenReturn(projects);
+
+        // act
+        List<ProjectResponseDto> response = projectService.filterProjects(status, priority);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(1L, response.get(0).getId());
+        assertEquals(2L, response.get(1).getId());
+        assertEquals(ProjectStatus.COMPLETED, response.get(0).getStatus());
+        assertEquals(ProjectStatus.COMPLETED, response.get(1).getStatus());
+        assertEquals(ProjectPriority.LOW, response.get(0).getPriority());
+        assertEquals(ProjectPriority.LOW, response.get(1).getPriority());
+
+        verify(projectRepository, never()).findByStatus(any(ProjectStatus.class));
+        verify(projectRepository, never()).findByPriority(any(ProjectPriority.class));
+        verify(projectRepository, never()).findAllByOrderByCreatedAtDesc();
+    }
+
+    @Test
+    public void filterProjects_shouldReturnAllProjectsWhenNothingMatches() {
+        // arrange
+        Project project1 = buildExistingProject(userWithId(1L));
+        project1.setId(1L);
+        project1.setPriority(ProjectPriority.LOW);
+        project1.setStatus(ProjectStatus.COMPLETED);
+        Project project2 = buildExistingProject(userWithId(1L));
+        project2.setId(2L);
+        project2.setPriority(ProjectPriority.LOW);
+        project2.setStatus(ProjectStatus.COMPLETED);
+        List<Project> projects = new ArrayList<>(List.of(project1, project2));
+
+        when(projectRepository.findAllByOrderByCreatedAtDesc()).thenReturn(projects);
+
+        // act
+        List<ProjectResponseDto> response = projectService.filterProjects(null, null);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(1L, response.get(0).getId());
+        assertEquals(2L, response.get(1).getId());
+        assertEquals(ProjectStatus.COMPLETED, response.get(0).getStatus());
+        assertEquals(ProjectStatus.COMPLETED, response.get(1).getStatus());
+        assertEquals(ProjectPriority.LOW, response.get(0).getPriority());
+        assertEquals(ProjectPriority.LOW, response.get(1).getPriority());
+
+        verify(projectRepository, never())
+                .findByStatusAndPriority(any(ProjectStatus.class), any(ProjectPriority.class));
+        verify(projectRepository, never()).findByStatus(any(ProjectStatus.class));
+        verify(projectRepository, never()).findByPriority(any(ProjectPriority.class));
+    }
+
+    @Test
+    public void filterProjects_shouldThrowExceptionWhenStatusIsNotValidEnum() {
+        // arrange
+        String status = "INVALID_STATUS";
+
+        // act & assert
+        assertThrows(IllegalArgumentException.class,
+                () -> projectService.filterProjects(status, null));
+
+        verify(projectRepository, never())
+                .findByStatusAndPriority(any(ProjectStatus.class), any(ProjectPriority.class));
+        verify(projectRepository, never()).findAllByOrderByCreatedAtDesc();
+        verify(projectRepository, never()).findByStatus(any(ProjectStatus.class));
+        verify(projectRepository, never()).findByPriority(any(ProjectPriority.class));
+    }
+
+    @Test
+    public void filterProjects_shouldThrowExceptionWhenPriorityIsNotValidEnum() {
+        // arrange
+        String priority = "INVALID_PRIORITY";
+
+        // act & assert
+        assertThrows(IllegalArgumentException.class,
+                () -> projectService.filterProjects(null, priority));
+
+        verify(projectRepository, never())
+                .findByStatusAndPriority(any(ProjectStatus.class), any(ProjectPriority.class));
+        verify(projectRepository, never()).findAllByOrderByCreatedAtDesc();
+        verify(projectRepository, never()).findByStatus(any(ProjectStatus.class));
+        verify(projectRepository, never()).findByPriority(any(ProjectPriority.class));
     }
 }
