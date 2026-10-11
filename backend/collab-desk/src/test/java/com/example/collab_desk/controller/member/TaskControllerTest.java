@@ -3,7 +3,6 @@ package com.example.collab_desk.controller.member;
 import com.example.collab_desk.dto.responseDto.ReminderResponseDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.entity.Project;
-import com.example.collab_desk.entity.Task;
 import com.example.collab_desk.enums.ReminderLevel;
 import com.example.collab_desk.enums.TaskCategory;
 import com.example.collab_desk.enums.TaskPriority;

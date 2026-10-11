@@ -7,6 +7,7 @@ import com.example.collab_desk.entity.ChatRoom;
 import com.example.collab_desk.entity.Message;
 import com.example.collab_desk.entity.User;
 import com.example.collab_desk.enums.NotificationType;
+import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.exception.UnauthorizedException;
 import com.example.collab_desk.repository.ChatRoomRepository;
 import com.example.collab_desk.repository.MessageRepository;
@@ -39,7 +40,7 @@ public class ChatServiceImpl implements ChatService {
 
         User sender = userService.getUserByEmail(email);
         ChatRoom room = chatRoomRepository.findById(req.getRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
         Message message = new Message();
 
