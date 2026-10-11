@@ -1,16 +1,14 @@
 package com.example.collab_desk.service;
 
 import com.example.collab_desk.dto.requestDto.CreateTaskRequestDto;
+import com.example.collab_desk.dto.requestDto.UpdateMemberRequestDto;
 import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
 import com.example.collab_desk.dto.responseDto.ProjectResponseDto;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.entity.Project;
 import com.example.collab_desk.entity.Task;
 import com.example.collab_desk.entity.User;
-import com.example.collab_desk.enums.TaskCategory;
-import com.example.collab_desk.enums.TaskPriority;
-import com.example.collab_desk.enums.TaskStatus;
-import com.example.collab_desk.enums.UserRole;
+import com.example.collab_desk.enums.*;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.exception.UnauthorizedException;
 import com.example.collab_desk.repository.TaskRepository;
@@ -29,6 +27,7 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,6 +45,9 @@ public class TaskServiceImplTest {
 
     @Mock
     private ProjectService projectService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private TaskServiceImpl taskService;
@@ -85,6 +87,7 @@ public class TaskServiceImplTest {
         CreateTaskRequestDto request = buildCreateRequest(List.of(1L));
         User member = userWithId(1L);
         Project project = projectWithId(1L);
+        project.setTitle("Test project");
 
         when(projectService.getProjectById(request.getProjectId()))
                 .thenReturn(project);
@@ -111,6 +114,12 @@ public class TaskServiceImplTest {
         assertEquals(4L, saved.getEstimatedTime());
         assertSame(project, saved.getProject());
         assertTrue(saved.getAssignedTo().contains(member));
+
+        verify(notificationService).notify(
+                eq(member),
+                eq(NotificationType.TASK),
+                eq("New task assigned in Test project"),
+                eq("You have been assigned a new task in the project Test project."));
     }
 
     @Test
@@ -122,16 +131,12 @@ public class TaskServiceImplTest {
                 .thenThrow(new ResourceNotFoundException("Project not found"));
 
         // Act & Assert
-        assertThrows(
-                ResourceNotFoundException.class,
-                () -> taskService.createTask(request)
-        );
+        assertThrows(ResourceNotFoundException.class, () -> taskService.createTask(request));
 
-        verify(userService, never())
-                .getUsersById(anyList());
-
-        verify(taskRepository, never())
-                .save(any(Task.class));
+        verify(userService, never()).getUsersById(anyList());
+        verify(notificationService, never()).notify(any(User.class), any(NotificationType.class),
+                anyString(), anyString());
+        verify(taskRepository, never()).save(any(Task.class));
     }
 
     @Test
@@ -145,13 +150,11 @@ public class TaskServiceImplTest {
                 .thenThrow(new ResourceNotFoundException("Users not found with ids: [2]"));
 
         // act & assert
-        assertThrows(
-                ResourceNotFoundException.class,
-                () -> taskService.createTask(request)
-        );
+        assertThrows(ResourceNotFoundException.class, () -> taskService.createTask(request));
 
-        verify(taskRepository, never())
-                .save(any(Task.class));
+        verify(notificationService, never()).notify(any(User.class), any(NotificationType.class),
+                anyString(), anyString());
+        verify(taskRepository, never()).save(any(Task.class));
     }
 
     @Test
@@ -169,10 +172,10 @@ public class TaskServiceImplTest {
                 .thenThrow(new RuntimeException("Database Error"));
 
         // act & assert
-        assertThrows(
-                RuntimeException.class,
-                () -> taskService.createTask(request)
-        );
+        assertThrows(RuntimeException.class, () -> taskService.createTask(request));
+
+        verify(notificationService, never()).notify(any(User.class), any(NotificationType.class),
+                anyString(), anyString());
     }
 
 
@@ -359,8 +362,10 @@ public class TaskServiceImplTest {
     public void getAllTasks_shouldReturnTasksSuccessfully() {
         // arrange
         Task task1 = buildExistingTask(userWithId(1L));
+        task1.setProject(projectWithId(1L));
         task1.setTitle("Task 1");
         Task task2 = buildExistingTask(userWithId(2L));
+        task2.setProject(projectWithId(1L));
         task2.setTitle("Task 2");
 
         List<Task> tasks = new ArrayList<>(List.of(task1, task2));
@@ -394,10 +399,11 @@ public class TaskServiceImplTest {
     // Get Task Test
 
     @Test
-    public void getProject_shouldReturnTaskSuccessfully() {
+    public void getTask_shouldReturnTaskSuccessfully() {
         // arrange
         Long taskId = 1L;
         Task task = buildExistingTask(userWithId(1L));
+        task.setProject(projectWithId(1L));
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
 
@@ -412,7 +418,7 @@ public class TaskServiceImplTest {
     }
 
     @Test
-    public void getProject_shouldThrowExceptionWhenTaskNotFound() {
+    public void getTask_shouldThrowExceptionWhenTaskNotFound() {
         // arrange
         Long taskId = 99L;
 
@@ -431,6 +437,7 @@ public class TaskServiceImplTest {
         Long taskId = 1L;
         User assignedUser = userWithId(1L);
         Task task = buildExistingTask(assignedUser);
+        task.setProject(projectWithId(1L));
         TaskStatus taskStatus = TaskStatus.DONE;
         User currentUser = userWithId(1L);
 
@@ -456,6 +463,7 @@ public class TaskServiceImplTest {
         Long taskId = 1L;
         User assignedUser = userWithId(2L);
         Task task = buildExistingTask(assignedUser);
+        task.setProject(projectWithId(1L));
         TaskStatus taskStatus = TaskStatus.DONE;
         User currentUser = userWithId(1L);
         currentUser.setRole(UserRole.ADMIN);
@@ -541,8 +549,10 @@ public class TaskServiceImplTest {
         Project project = projectWithId(projectId);
 
         Task task1 = buildExistingTask(userWithId(1L));
+        task1.setProject(projectWithId(1L));
         task1.setTitle("Task 1");
         Task task2 = buildExistingTask(userWithId(2L));
+        task2.setProject(projectWithId(2L));
         task2.setTitle("Task 2");
 
         List<Task> tasks = new ArrayList<>(List.of(task1, task2));
@@ -595,23 +605,25 @@ public class TaskServiceImplTest {
     // Get My Tasks By Year And Month
 
     @Test
-    public void getMyTasksByYearAndMonth_shouldReturnTasksSuccessfully() {
+    public void getTasksByYearAndMonth_shouldReturnTasksWhenUserIsMemberSuccessfully() {
         // arrange
         YearMonth yearMonth = YearMonth.of(2026, 9);
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
 
         User currentUser = userWithId(1L);
+        currentUser.setRole(UserRole.MEMBER);
         Task task1 = buildExistingTask(currentUser);
+        task1.setProject(projectWithId(1L));
         task1.setTitle("Task 1");
         Task task2 = buildExistingTask(currentUser);
+        task2.setProject(projectWithId(2L));
         task2.setTitle("Task 2");
         List<Task> tasks = new ArrayList<>(List.of(task1, task2));
 
         when(userService.getCurrentUser()).thenReturn(currentUser);
         when(taskRepository.findByDueDateBetweenAndAssignedTo_Id(eq(startDate),
                 eq(endDate), eq(currentUser.getId()))).thenReturn(tasks);
-
 
         // act
         List<TaskResponseDto> response = taskService.getTaskByYearAndMonth(2026, 9);
@@ -623,16 +635,53 @@ public class TaskServiceImplTest {
         assertEquals("Task 2", response.get(1).getTitle());
         assertEquals(1, response.get(0).getAssignedTo().getFirst().getId());
         assertEquals(1, response.get(1).getAssignedTo().getFirst().getId());
+
+        verify(taskRepository, never()).findByDueDateBetween(any(), any());
     }
 
     @Test
-    public void getMyTasksByYearAndMonth_shouldReturnEmptyTaskListSuccessfully() {
+    public void getTasksByYearAndMonth_shouldReturnTasksWhenUserIsAdminSuccessfully() {
         // arrange
+        YearMonth yearMonth = YearMonth.of(2026, 9);
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+
+        User currentUser = userWithId(1L);
+        currentUser.setRole(UserRole.ADMIN);
+        Task task1 = buildExistingTask(userWithId(3L));
+        task1.setProject(projectWithId(1L));
+        task1.setTitle("Task 1");
+        Task task2 = buildExistingTask(userWithId(4L));
+        task2.setProject(projectWithId(2L));
+        task2.setTitle("Task 2");
+        List<Task> tasks = new ArrayList<>(List.of(task1, task2));
+
+        when(userService.getCurrentUser()).thenReturn(currentUser);
+        when(taskRepository.findByDueDateBetween(eq(startDate), eq(endDate))).thenReturn(tasks);
+
+        // act
+        List<TaskResponseDto> response = taskService.getTaskByYearAndMonth(2026, 9);
+
+        // assert
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals("Task 1", response.get(0).getTitle());
+        assertEquals("Task 2", response.get(1).getTitle());
+        assertEquals(3, response.get(0).getAssignedTo().getFirst().getId());
+        assertEquals(4, response.get(1).getAssignedTo().getFirst().getId());
+
+        verify(taskRepository, never()).findByDueDateBetweenAndAssignedTo_Id(any(), any(), anyLong());
+
+    }
+
+    @Test
+    public void getTasksByYearAndMonth_shouldReturnEmptyTaskListWhenUserIsMemberSuccessfully() {
         // arrange
         YearMonth yearMonth = YearMonth.of(2026, 10);
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
         User currentUser = userWithId(1L);
+        currentUser.setRole(UserRole.MEMBER);
 
         List<Task> tasks = new ArrayList<>();
 
@@ -646,55 +695,108 @@ public class TaskServiceImplTest {
         // assert
         assertNotNull(response);
         assertEquals(0, response.size());
-    }
 
-    // Get Tasks By Year And Month - ADMIN
+        verify(taskRepository, never()).findByDueDateBetween(any(), any());
 
-
-    @Test
-    public void getTasksByYearAndMonth_shouldReturnTasksSuccessfully() {
-        // arrange
-        YearMonth yearMonth = YearMonth.of(2026, 9);
-        LocalDate startDate = yearMonth.atDay(1);
-        LocalDate endDate = yearMonth.atEndOfMonth();
-
-        Task task1 = buildExistingTask(userWithId(1L));
-        task1.setTitle("Task 1");
-        Task task2 = buildExistingTask(userWithId(2L));
-        task2.setTitle("Task 2");
-        List<Task> tasks = new ArrayList<>(List.of(task1, task2));
-
-        when(taskRepository.findByDueDateBetween(eq(startDate), eq(endDate))).thenReturn(tasks);
-
-        // act
-        List<TaskResponseDto> response = taskService.getTaskByYearAndMonth(2026, 9);
-
-        // assert
-        assertNotNull(response);
-        assertEquals(2, response.size());
-        assertEquals(1, response.get(0).getAssignedTo().getFirst().getId());
-        assertEquals(2, response.get(1).getAssignedTo().getFirst().getId());
-        assertEquals("Task 1", response.get(0).getTitle());
-        assertEquals("Task 2", response.get(1).getTitle());
     }
 
     @Test
-    public void getTasksByYearAndMonth_shouldReturnEmptyTaskListSuccessfully() {
+    public void getTasksByYearAndMonth_shouldReturnEmptyTaskListWhenUserIsAdminSuccessfully() {
         // arrange
-        YearMonth yearMonth = YearMonth.of(2026, 9);
+        YearMonth yearMonth = YearMonth.of(2026, 10);
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
-        List<Task> tasks = new ArrayList<>(List.of());
+        User currentUser = userWithId(1L);
+        currentUser.setRole(UserRole.ADMIN);
 
-        when(taskRepository.findByDueDateBetween(eq(startDate), eq(endDate))).thenReturn(tasks);
+        List<Task> tasks = new ArrayList<>();
+
+        when(userService.getCurrentUser()).thenReturn(currentUser);
+        when(taskRepository.findByDueDateBetween(eq(startDate),
+                eq(endDate))).thenReturn(tasks);
 
         // act
-        List<TaskResponseDto> response = taskService.getTaskByYearAndMonth(2026, 9);
+        List<TaskResponseDto> response = taskService.getTaskByYearAndMonth(2026, 10);
 
         // assert
         assertNotNull(response);
         assertEquals(0, response.size());
+
+
+        verify(taskRepository, never()).findByDueDateBetweenAndAssignedTo_Id(any(), any(), anyLong());
     }
 
+    // Update members tests
+
+    @Test
+    public void updateMembers_shouldUpdateMembersSuccessfully() {
+        // arrange
+        Long taskId = 1L;
+
+        UpdateMemberRequestDto request = new UpdateMemberRequestDto();
+        request.setAssignedTo(List.of(3L));
+
+        User assignedUser = userWithId(2L);
+        Task existingTask = buildExistingTask(assignedUser);
+        existingTask.setProject(projectWithId(1L));
+
+        when(taskRepository.findById(eq(taskId))).thenReturn(Optional.of(existingTask));
+        when(userService.getUsersById(List.of(3L))).thenReturn(Set.of(userWithId(3L)));
+        when(taskRepository.save(eq(existingTask))).thenAnswer(i -> i.getArgument(0));
+
+        // act
+        TaskResponseDto response = taskService.updateMembers(taskId, request);
+
+        // assert
+        ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
+        verify(taskRepository).save(captor.capture());
+        Task saved = captor.getValue();
+
+
+        assertNotNull(response);
+        assertSame(existingTask, saved);
+        assertEquals(new HashSet<>(request.getAssignedTo()), saved.getAssignedTo().stream()
+                .map(User::getId)
+                .collect(Collectors.toSet()));
+    }
+
+    @Test
+    public void updateMembers_shouldThrowExceptionWhenTaskNotFound() {
+        // arrange
+        Long taskId = 1L;
+
+        UpdateMemberRequestDto request = new UpdateMemberRequestDto();
+        request.setAssignedTo(List.of(2L));
+
+        when(taskRepository.findById(eq(taskId))).thenReturn(Optional.empty());
+
+        // act
+        assertThrows(ResourceNotFoundException.class, () -> taskService.updateMembers(taskId, request));
+
+        verify(userService, never()).getUsersById(anyList());
+        verify(taskRepository, never()).save(any(Task.class));
+    }
+
+    @Test
+    public void updateMembers_shouldThrowExceptionWhenMemberNotFound() {
+        // arrange
+        Long taskId = 1L;
+
+        UpdateMemberRequestDto request = new UpdateMemberRequestDto();
+        request.setAssignedTo(List.of(2L, 3L));
+
+        User assignedUser = userWithId(2L);
+        Task existingTask = buildExistingTask(assignedUser);
+        existingTask.setProject(projectWithId(1L));
+
+        when(taskRepository.findById(eq(taskId))).thenReturn(Optional.of(existingTask));
+        when(userService.getUsersById(List.of(2L, 3L)))
+                .thenThrow(new ResourceNotFoundException("Users not found with ids: [3]"));
+
+        // act
+        assertThrows(ResourceNotFoundException.class, () -> taskService.updateMembers(taskId, request));
+
+        verify(taskRepository, never()).save(any(Task.class));
+    }
 
 }

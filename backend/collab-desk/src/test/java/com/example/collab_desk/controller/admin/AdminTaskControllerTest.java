@@ -1,10 +1,7 @@
 package com.example.collab_desk.controller.admin;
 
 import com.example.collab_desk.config.SecurityConfig;
-import com.example.collab_desk.dto.requestDto.CreateProjectRequest;
-import com.example.collab_desk.dto.requestDto.CreateTaskRequestDto;
-import com.example.collab_desk.dto.requestDto.UpdateProjectRequest;
-import com.example.collab_desk.dto.requestDto.UpdateTaskRequestDto;
+import com.example.collab_desk.dto.requestDto.*;
 import com.example.collab_desk.dto.responseDto.TaskResponseDto;
 import com.example.collab_desk.dto.responseDto.UserResponseDto;
 import com.example.collab_desk.enums.TaskCategory;
@@ -537,5 +534,127 @@ public class AdminTaskControllerTest {
                 .andExpect(status().isForbidden());
 
         verify(taskService, never()).getTaskByYearAndMonth(anyInt(), anyInt());
+    }
+
+    // update members tests
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void updateMembers_shouldReturn200WhenRequestIsValid() throws Exception {
+        // arrange
+        Long taskId = 1L;
+        UpdateMemberRequestDto request = new UpdateMemberRequestDto();
+        request.setAssignedTo(List.of(2L));
+
+        TaskResponseDto taskResponseDto = new TaskResponseDto(
+                1L,
+                "Task 2",
+                "Test description",
+                TaskStatus.IN_PROGRESS,
+                TaskCategory.DESIGN,
+                TaskPriority.HIGH,
+                LocalDate.now().plusDays(2),
+                4L,
+                List.of(new UserResponseDto(2L, "Test User",
+                        "test@gmail.com", "https://test.com/profile.png")),
+                LocalDateTime.now(),
+                "Test project name");
+
+        when(taskService.updateMembers(eq(taskId), any(UpdateMemberRequestDto.class)))
+                .thenReturn(taskResponseDto);
+
+        // act & assert
+        mockMvc.perform(patch("/api/admin/tasks/members/update/{id}", taskId).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assignedTo[0].id").value(2));
+
+    }
+
+    @Test
+    @WithMockUser(authorities = "MEMBER")
+    public void updateMembers_shouldReturn403WhenUserIsNotAdmin() throws Exception {
+        // arrange
+        Long taskId = 1L;
+        UpdateMemberRequestDto request = new UpdateMemberRequestDto();
+        request.setAssignedTo(List.of(2L));
+
+        // act & assert
+        mockMvc.perform(patch("/api/admin/tasks/members/update/{id}", taskId).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        verify(taskService, never()).updateMembers(anyLong(), any(UpdateMemberRequestDto.class));
+    }
+
+    @Test
+    public void updateMembers_shouldReturn401WhenUserIsNotAuthenticated() throws Exception {
+        // arrange
+        Long taskId = 1L;
+        UpdateMemberRequestDto request = new UpdateMemberRequestDto();
+        request.setAssignedTo(List.of(2L));
+
+        // act & assert
+        mockMvc.perform(patch("/api/admin/tasks/members/update/{id}", taskId).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+
+        verify(taskService, never()).updateMembers(anyLong(), any(UpdateMemberRequestDto.class));
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void updateMembers_shouldReturn404WhenTaskNotFound() throws Exception {
+        // arrange
+        Long taskId = 1L;
+        UpdateMemberRequestDto request = new UpdateMemberRequestDto();
+        request.setAssignedTo(List.of(2L));
+
+        when(taskService.updateMembers(eq(taskId), any(UpdateMemberRequestDto.class)))
+                .thenThrow(new ResourceNotFoundException("Task not found"));
+
+        // act & assert
+        mockMvc.perform(patch("/api/admin/tasks/members/update/{id}", taskId).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void updateMembers_shouldReturn404WhenMemberNotFound() throws Exception {
+        // arrange
+        Long taskId = 1L;
+        UpdateMemberRequestDto request = new UpdateMemberRequestDto();
+        request.setAssignedTo(List.of(2L, 3L));
+
+        when(taskService.updateMembers(eq(taskId), any(UpdateMemberRequestDto.class)))
+                .thenThrow(new ResourceNotFoundException("Users not found with ids: [3]"));
+
+        // act & assert
+        mockMvc.perform(patch("/api/admin/tasks/members/update/{id}", taskId).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    public void updateMembers_shouldReturn400WhenValidationFails() throws Exception {
+        // arrange
+        Long taskId = 1L;
+        UpdateMemberRequestDto request = new UpdateMemberRequestDto();
+        request.setAssignedTo(List.of());
+
+        // act & assert
+        mockMvc.perform(patch("/api/admin/tasks/members/update/{id}", taskId).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        verify(taskService, never()).updateMembers(anyLong(), any(UpdateMemberRequestDto.class));
     }
 }

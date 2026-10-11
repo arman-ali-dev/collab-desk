@@ -56,6 +56,8 @@ public class TaskServiceImpl implements TaskService {
         task.setProject(project);
         task.setAssignedTo(users);
 
+        Task saved = taskRepository.save(task);
+
         String title = "New task assigned in " + project.getTitle();
         String message = "You have been assigned a new task in the project " + project.getTitle() + ".";
 
@@ -63,7 +65,7 @@ public class TaskServiceImpl implements TaskService {
             notificationService.notify(member, NotificationType.TASK, title, message);
         }
 
-        return mapToTaskResponseDto(taskRepository.save(task));
+        return mapToTaskResponseDto(saved);
     }
 
     @Override
