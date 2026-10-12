@@ -196,7 +196,7 @@ public class CommentControllerTest {
 
     }
 
-    // Get Comment Controller
+    // Get Comment
 
     @Test
     @WithMockUser

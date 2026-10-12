@@ -233,4 +233,78 @@ public class CommentServiceImplTest {
         assertThrows(ResourceNotFoundException.class,
                 () -> commentService.getComment(commentId));
     }
+
+    // delete comment tests
+
+    @Test
+    public void deleteComment_shouldDeleteCommentSuccessfully() {
+        // arrange
+        Long commentId = 1L;
+        User currentUser = userWithId(1L);
+
+        Comment comment = new Comment();
+        comment.setId(1L);
+        comment.setAuthor(currentUser);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+        when(userService.getCurrentUser()).thenReturn(currentUser);
+
+        // act
+        commentService.deleteComment(commentId);
+
+        verify(commentRepository).delete(comment);
+    }
+
+    @Test
+    public void deleteComment_shouldThrowExceptionWhenCommentNotFound() {
+        // arrange
+        Long commentId = 1L;
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        // act
+        assertThrows(ResourceNotFoundException.class, () -> commentService.deleteComment(commentId));
+
+        verify(userService, never()).getCurrentUser();
+        verify(commentRepository, never()).delete(any(Comment.class));
+    }
+
+    @Test
+    public void deleteComment_shouldThrowExceptionUserIsNotAuthor() {
+        // arrange
+        Long commentId = 1L;
+        User currentUser = userWithId(1L);
+
+        Comment comment = new Comment();
+        comment.setId(1L);
+        comment.setAuthor(userWithId(2L));
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+        when(userService.getCurrentUser()).thenReturn(currentUser);
+
+        // act
+        assertThrows(UnauthorizedException.class, () -> commentService.deleteComment(commentId));
+
+        verify(commentRepository, never()).delete(any(Comment.class));
+    }
+
+    @Test
+    public void deleteComment_shouldThrowExceptionUserIsNotAuthenticated() {
+        // arrange
+        Long commentId = 1L;
+
+        Comment comment = new Comment();
+        comment.setId(1L);
+        comment.setAuthor(userWithId(2L));
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+        when(userService.getCurrentUser())
+                .thenThrow(new UnauthorizedException("User is not authenticated"));
+
+        // act
+        assertThrows(UnauthorizedException.class, () -> commentService.deleteComment(commentId));
+
+        verify(commentRepository, never()).delete(any(Comment.class));
+    }
+
 }

@@ -327,7 +327,7 @@ public class ProjectServiceImplTest {
 
         // act * assert
         assertThrows(
-                RuntimeException.class,
+                ResourceNotFoundException.class,
                 () -> projectService.deleteProject(projectId)
         );
 
