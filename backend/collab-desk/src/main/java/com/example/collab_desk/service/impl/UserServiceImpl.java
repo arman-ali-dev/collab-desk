@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordSetupTokenRepository passwordSetupTokenRepository;
     private final EmailService emailService;
 
-    @Value("${app.frontend-url}:http://localhost:5173")
+    @Value("${app.frontend-url}")
     private String frontendUrl;
 
     @Override
@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
 
         passwordSetupTokenRepository.save(passwordSetupToken);
 
-        String link = frontendUrl == null ? "http://localhost:5173/set-password?token=" + hashedToken : frontendUrl + "/set-password?token=" + hashedToken;
+        String link = frontendUrl + "/set-password?token=" + hashedToken;
         String email = user.getEmail();
         String fullName = user.getFullName();
 

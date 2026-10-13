@@ -18,6 +18,7 @@ import com.example.collab_desk.exception.UnauthorizedException;
 import com.example.collab_desk.repository.PasswordSetupTokenRepository;
 import com.example.collab_desk.repository.UserRepository;
 import com.example.collab_desk.service.impl.UserServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -61,6 +63,11 @@ public class UserServiceImplTest {
         User user = new User();
         user.setId(id);
         return user;
+    }
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(userService, "frontendUrl", "http://localhost:5173");
     }
 
     // get user tests
