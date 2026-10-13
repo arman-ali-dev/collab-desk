@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordSetupTokenRepository passwordSetupTokenRepository;
     private final EmailService emailService;
 
-    @Value("${app.frontend-url}")
+    @Value("${app.frontend-url}:http://localhost:5173")
     private String frontendUrl;
 
     @Override
@@ -110,6 +111,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserProfileResponseDto createMember(CreateMemberRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("User is already exists");
@@ -133,7 +135,7 @@ public class UserServiceImpl implements UserService {
 
         passwordSetupTokenRepository.save(passwordSetupToken);
 
-        String link = frontendUrl + "/set-password?token=" + hashedToken;
+        String link = frontendUrl == null ? "http://localhost:5173/set-password?token=" + hashedToken : frontendUrl + "/set-password?token=" + hashedToken;
         String email = user.getEmail();
         String fullName = user.getFullName();
 
