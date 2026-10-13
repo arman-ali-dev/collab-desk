@@ -8,6 +8,7 @@ import com.example.collab_desk.dto.responseDto.PasswordSetupResponseDto;
 import com.example.collab_desk.entity.PasswordSetupToken;
 import com.example.collab_desk.entity.User;
 import com.example.collab_desk.enums.UserStatus;
+import com.example.collab_desk.exception.DuplicateResourceException;
 import com.example.collab_desk.exception.InvalidTokenException;
 import com.example.collab_desk.exception.ResourceNotFoundException;
 import com.example.collab_desk.repository.PasswordSetupTokenRepository;
@@ -18,10 +19,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDto register(RegisterRequestDto request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException("User is already exists");
+        }
+
         User user = new User(
                 request.getFullName(),
                 request.getEmail(),
@@ -62,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
+    @Transactional
     public PasswordSetupResponseDto setPassword(PasswordSetupRequestDto request) {
         PasswordSetupToken token = passwordSetupTokenRepository.findByTokenHash(request.getToken())
                 .orElseThrow(() -> new ResourceNotFoundException("Token not found"));
